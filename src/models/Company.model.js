@@ -10,9 +10,7 @@ const companySchema = new mongoose.Schema(
 
     },
     gst: {
-      type: String,
-      required: true,
-      unique: true
+      type: String
     },
     address: {
       type: String,
