@@ -14,6 +14,7 @@ export const recordController = async (req, res) => {
         const bulkRefId = req.body.bulkRefId;
         const userData = req.body.userData;
         const amount = req.body.amount;
+        const stage = 5;
 
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !bulkRefId || !userData || !amount) {
             return sendError(res, 'Invalid payload', 400);
@@ -32,7 +33,7 @@ export const recordController = async (req, res) => {
 
 
         const registerPrimaryData = await addUsersService(userData, log);
-        await updatePaymentByBulkRefId(bulkRefId, log, amount);
+        await updatePaymentByBulkRefId(bulkRefId, log, amount, stage);
 
 
         const mails = await findPrimaryUser(userData);
@@ -53,7 +54,8 @@ export const recordController = async (req, res) => {
 const updatePaymentByBulkRefId = async (
     bulkRefId,
     paymentId,
-    paymentAmount = 0
+    paymentAmount = 0,
+    stage
 ) => {
     return await BookingLogs.updateMany(
         { bulkRefId },
@@ -61,7 +63,8 @@ const updatePaymentByBulkRefId = async (
             $set: {
                 payment: 1,              // success
                 paymentId: paymentId,    // ObjectId
-                paymentAmount
+                paymentAmount,
+                stage
             }
         }
     );

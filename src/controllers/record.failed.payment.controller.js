@@ -12,6 +12,7 @@ export const recordFailedController = async (req, res) => {
         const logId = req.body.logId;
         const amount = req.body.amount;
         const userData = req.body.userData;
+        const stage = 5;
 
         if (!error || !bulkRefId || !logId || !bulkRefId || !amount || !userData) {
             return sendError(res, 'Invalid payload', 400);
@@ -28,7 +29,7 @@ export const recordFailedController = async (req, res) => {
             ...log._doc
         }
 
-        await updatePaymentByBulkRefId(bulkRefId, log, amount);
+        await updatePaymentByBulkRefId(bulkRefId, log, amount, stage);
 
         const mails = await findPrimaryUser(userData);
 
@@ -48,7 +49,8 @@ export const recordFailedController = async (req, res) => {
 const updatePaymentByBulkRefId = async (
     bulkRefId,
     paymentId,
-    paymentAmount = 0
+    paymentAmount = 0,
+    stage
 ) => {
     return await BookingLogs.updateMany(
         { bulkRefId },
@@ -56,7 +58,8 @@ const updatePaymentByBulkRefId = async (
             $set: {
                 payment: 2,              // failed
                 paymentId: paymentId,    // ObjectId
-                paymentAmount
+                paymentAmount,
+                stage
             }
         }
     );

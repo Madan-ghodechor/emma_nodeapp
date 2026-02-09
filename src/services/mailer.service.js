@@ -88,7 +88,8 @@ export function paymentFailedTemplate(data) {
     retryPaymentUrl
   } = data;
 
-  const roomsHtml = userData.map(room => {
+  const roomsHtml = userData.map((room, index) => {
+    const roomNumber = index + 1;
     const attendeesHtml = room.attendees.map(att => `
       <tr>
         <td style="font-size:12px;">${att.firstName} ${att.lastName}</td>
@@ -103,7 +104,7 @@ export function paymentFailedTemplate(data) {
         
         <tr style="background:#f9fafb;">
           <td colspan="2" style="font-size:14px;font-weight:bold;">
-            Room: ${room.roomId}
+            Room ${roomNumber}: ${room.roomtype} occupancy
           </td>
         </tr>
 
@@ -216,7 +217,8 @@ export function paymentSuccessTemplate(data) {
     userData
   } = data;
 
-  const roomsHtml = userData.map(room => {
+  const roomsHtml = userData.map((room, index) => {
+  const roomNumber = index + 1;
     const attendeesHtml = room.attendees.map(att => `
       <tr>
         <td style="font-size:12px;">${att.firstName} ${att.lastName}</td>
@@ -231,7 +233,7 @@ export function paymentSuccessTemplate(data) {
         
         <tr style="background:#f3fdf6;">
           <td colspan="2" style="font-size:14px;font-weight:bold;">
-            Room: ${room.roomtype} (${room.roomId})
+            Room ${roomNumber}: ${room.roomtype} occupancy
           </td>
         </tr>
 

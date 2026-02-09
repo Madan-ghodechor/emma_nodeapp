@@ -7,7 +7,7 @@ export const addUsersService = async (data, payment = null) => {
     try {
 
         const roomsPayload = data;
-        const bulkRefId = `BULK_${Date.now()}_${crypto
+        const bulkRefId = `CTXEHB_${Date.now()}_${crypto
             .randomBytes(3)
             .toString('hex')}`;
 
