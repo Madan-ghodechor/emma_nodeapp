@@ -31,7 +31,7 @@ export const getRecordController = async (req, res) => {
 
         const userData = rooms.map(room => {
             const payment = paymentMap.get(room.paymentId?.toString());
-            console.log(payment)
+ 
 
             return {
                 roomId: room.roomId,

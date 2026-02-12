@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    @page {
+      margin: 7mm;
+      padding: 2mm 0mm;
+      border: 2px solid #7c6cff;
+      pointer-events: none;
+    }
+
+    body {
+      margin: 0;
+      background: #ffffff;
+      font-family: "Poppins", sans-serif;
+      color: #222;
+    }
+
+    .voucher {
+      margin: 20px;
+      background: #ffffff;
+      padding: 0px;
+
+
+      /* HEADER */
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffffff;
+
+        .logo {
+          font-size: 22px;
+          font-weight: 600;
+          color: #6c63ff;
+
+          small {
+            display: block;
+            font-size: 12px;
+            color: #777;
+            font-weight: 400;
+          }
+        }
+
+        .right-logos {
+          display: flex;
+          gap: 20px;
+          font-weight: 700;
+        }
+      }
+
+      /* TITLE */
+      .title {
+        text-align: center;
+        margin: -12px 0 10px;
+        font-size: 25px;
+        color: #6c63ff;
+        font-weight: 700;
+      }
+
+      /* BOOKING ID */
+      .booking-id {
+        margin: -6px auto;
+        width: fit-content;
+        padding: 10px 40px;
+        border-radius: 25px;
+        background: linear-gradient(90deg, #4f44cd, #8b80ff);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      /* BOOKED */
+      .booked {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 18px;
+      }
+
+      /* HOTEL INFO */
+      .hotel-box {
+        margin-top: 15px;
+        /* border: 2px solid #7c6cff; */
+        border-radius: 8px;
+        display: flex;
+        position: relative;
+        background: #fff;
+        overflow: hidden;
+
+        /* inward cut */
+        .inwardCuts {
+          content: "";
+          position: absolute;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 2px solid #7c6cff;
+        }
+
+        .top-left-corner {
+          top: -25px;
+          left: -25px;
+        }
+
+        .top-right-corner {
+          top: -25px;
+          right: -25px
+        }
+
+        .bottom-left-corner {
+          bottom: -25px;
+          left: -25px;
+        }
+
+        .bottom-right-corner {
+          bottom: -25px;
+          right: -25px
+        }
+
+        .hotel-content {
+          display: flex;
+          background: #fff;
+          width: 100%;
+          border: 2px solid #7c6cff;
+
+          .hotel-left {
+            flex: 1;
+            padding: 27px;
+
+            .hotel-name {
+              font-size: 26px;
+              color: #6c63ff;
+              font-weight: 500;
+              margin-bottom: 3px;
+            }
+
+            .hotel-address {
+              border-top: 1px solid #eaeaea;
+              border-bottom: 1px solid #e4e4e4;
+              padding: 10px 0px;
+              font-weight: 500;
+              font-size: 14px;
+            }
+
+            .hotel-contact {
+              margin-top: 7px;
+              display: flex;
+              gap: 20px;
+              font-size: 15px;
+              display: flex;
+              align-items: center;
+              font-weight: 550;
+
+              div {
+                display: flex;
+                align-items: center;
+
+                img {
+                  width: 24px;
+                }
+
+                span {
+                  margin-left: 15px;
+                }
+              }
+            }
+
+          }
+
+          .hotel-right {
+            width: 160px;
+            border-left: 1px solid #ddd;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+
+            .confirmed {
+              width: 100%;
+              background-image: linear-gradient(90deg, #b399fa, #554bd0);
+              color: #fff;
+              padding: 5px 15px;
+              font-size: 16px;
+              font-weight: 500;
+              text-align: left;
+              display: flex;
+              align-items: center;
+
+              img {
+                width: 22px;
+              }
+            }
+
+            .google-location {
+              width: 100%;
+              flex: 1;
+              display: flex;
+              justify-content: center;
+
+              .content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+                text-decoration: none;
+
+                img {
+                  width: 55%;
+                  margin-top: 10px;
+                }
+
+                .name {
+                  width: auto;
+                  position: absolute;
+                  bottom: 36px;
+                  font-size: 13px;
+                }
+              }
+            }
+          }
+        }
+
+
+      }
+
+      /* ATTENDEE */
+      .attendee {
+        margin: 15px 0 15px;
+        color: #000000;
+        font-weight: 500;
+
+        h3 {
+          margin: 0px;
+          font-size: 22px;
+          font-weight: 600;
+        }
+
+      }
+
+      /* ROOMS */
+      .room {
+        border: 2px solid #7c6cff;
+        border-radius: 10px;
+        margin-top: 20px;
+        padding: 10px 15px;
+        display: flex;
+        overflow: hidden;
+
+        .room-strip {
+          width: 25px;
+          background: #6c63ff;
+        }
+
+        .room-content {
+          flex: 1;
+          padding: 3px 18px;
+
+          .room-title {
+            color: #6c63ff;
+            font-weight: 500;
+            font-size: 22.21px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+          }
+
+          .row {
+            display: flex;
+            margin: -4px 0;
+
+            div {
+              width: 50%;
+              font-size: 15.60px;
+              font-weight: 600;
+              display: flex;
+              align-items: center;
+
+              img {
+                width: 28px;
+              }
+
+              span {
+                margin-left: 10px;
+              }
+            }
+          }
+
+          .guest-loop {
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+
+            .label {
+              font-size: 10.40px;
+              color: #777;
+              margin-top: 3px;
+            }
+
+            .guest {
+              display: flex;
+              flex-direction: row;
+
+              .details {
+                display: flex;
+                font-size: 15.60px;
+                flex-direction: column;
+                width: 50%;
+
+                div {
+                  display: flex;
+                  align-items: center;
+                  margin-top: 2px;
+
+                  img {
+                    width: 28px;
+                  }
+
+                  span {
+                    margin-left: 15px;
+                  }
+                }
+              }
+            }
+          }
+
+
+        }
+      }
+
+      /* STATIC SECTION */
+      .static-details {
+        padding: 10px;
+
+        .heading {
+          break-inside: avoid;
+          page-break-inside: avoid;
+
+          h1 {
+            font-size: 20px;
+          }
+
+          p,
+          li {
+            font-size: 14px;
+            margin: 0px;
+          }
+        }
+      }
+
+      /* FOOTER SECTION */
+      .footer-section {
+        width: 100%;
+
+        img {
+          width: 100%;
+        }
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="page-border"></div>
+
+
+  <div class="voucher">
+
+    <!-- header -->
+    <div class="top-bar">
+      <img src="./Assets/header.svg" alt="">
+    </div>
+
+    <!-- title -->
+    <div class="title">HOTEL CONFIRMATION VOUCHER</div>
+
+    <div class="booking-id">
+      Booking ID: TVTESTHTL53426
+    </div>
+
+    <div class="booked">Booked on: 10 Feb 2026</div>
+
+    <!-- hotel -->
+    <div class="hotel-box">
+      <div class="top-left-corner inwardCuts"></div>
+      <div class="top-right-corner inwardCuts"></div>
+      <div class="bottom-left-corner inwardCuts"></div>
+      <div class="bottom-right-corner inwardCuts"></div>
+
+      <div class="hotel-content">
+        <div class="hotel-left">
+          <div class="hotel-name">Pragati Resorts</div>
+          <div class="hotel-address">
+            Chilkur Balaji Temple Road, Proddutur Village, Ranga Reddy District,
+            Hyderabad, 501504, Telangana
+          </div>
+
+          <div class="hotel-contact">
+            <div> <img src="./Assets/phone.svg" alt=""> <span>96200 74317 </span> </div>
+            <div> <img src="./Assets/mail.svg" alt=""> <span>reservation@pragatiresorts.com </span> </div>
+          </div>
+        </div>
+
+        <div class="hotel-right">
+          <div class="confirmed"> <img src="./Assets/Checkmark.svg" alt="tick"> CONFIRMED</div>
+          <div class="google-location">
+            <a class="content" href="https://cotrav.in" target="_blank">
+              <div class="icon">
+                <img src="./Assets/location.svg" alt="location icon">
+              </div>
+              <div class="name">
+                Google Location
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- attendee -->
+    <div class="attendee">
+      <h3>Primary Attendee</h3>
+      <div>Name: Madan Ghodechor Email: madan.ghodechor@cotrav.co</div>
+    </div>
+
+    <!-- room 1 -->
+    <div class="room">
+      <div class="room-strip"></div>
+      <div class="room-content">
+        <div class="room-title">Room 1 - Single Occupancy</div>
+
+        <div class="row">
+          <div><img src="./Assets/checkIn.svg" alt="📅"> <span> Check-in: 23 Mar 2026 </span></div>
+          <div><img src="./Assets/checkOut.svg" alt="➡"> <span> Check-out: 25 Mar 2026 </span></div>
+        </div>
+
+        <div class="guest-loop">
+          <div class="label">Guest 1</div>
+          <div class="guest">
+            <div class="details">
+              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
+              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
+            </div>
+            <div class="details">
+              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
+              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- room 2 -->
+    <div class="room">
+      <div class="room-strip"></div>
+      <div class="room-content">
+        <div class="room-title">Room 1 - Single Occupancy</div>
+
+        <div class="row">
+          <div><img src="./Assets/checkIn.svg" alt="📅"> <span> Check-in: 23 Mar 2026 </span></div>
+          <div><img src="./Assets/checkOut.svg" alt="➡"> <span> Check-out: 25 Mar 2026 </span></div>
+        </div>
+
+        <div class="guest-loop">
+          <div class="label">Guest 1</div>
+          <div class="guest">
+            <div class="details">
+              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
+              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
+            </div>
+            <div class="details">
+              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
+              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
+            </div>
+          </div>
+        </div>
+        <div class="guest-loop">
+          <div class="label">Guest 1</div>
+          <div class="guest">
+            <div class="details">
+              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
+              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
+            </div>
+            <div class="details">
+              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
+              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
+            </div>
+          </div>
+        </div>
+        <div class="guest-loop">
+          <div class="label">Guest 1</div>
+          <div class="guest">
+            <div class="details">
+              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
+              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
+            </div>
+            <div class="details">
+              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
+              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Static Details Section -->
+    <div class="static-details">
+      <div class="general-hotel-policy">
+        <div class="heading">
+          <h1>General Hotel Policy</h1>
+          <ul>
+            <li>The Standard check-in time: 12:00 PM </li>
+            <li>The Standard check-out time: 12:00 PM </li>
+            <li>Early check-in or late check-out is subject to availability and may incur additional
+              charges.</li>
+            <li>The Standard cancellation charges will apply as per the contract or as communicated at the
+              time of booking.</li>
+            <li>Any request for early check-in or late check-out must be confirmed directly with the hotel.
+            </li>
+            <li>All guests are required to present valid ID proof at check-in.</li>
+            <li>Locals (within a 30 km radius) and unmarried couples are not allowed. </li>
+            <li>Most hotels do not permit check-in for unmarried or unrelated couples. This decision is at
+              the discretion of hotel management, and no refund will be issued if check-in is denied under
+              such circumstances. </li>
+            <li>Cotrav is not responsible for any changes in the hotel’s check-in, check-out, or other
+              policies.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="terms_and_condition">
+        <div class="heading">
+          <h1>Terms & Conditions</h1>
+          <p>The South Factor provides a platform to facilitate transactions between agents, clients, users,
+            and customers. The South Factor is responsible for:</p>
+          <ul>
+            <li>Issuing a valid hotel voucher (accepted by the hotel).</li>
+            <li>Offering support in case of cancellations.</li>
+            <li>Providing customer support and assistance if needed.</li>
+          </ul>
+          <p>The South Factor is not responsible for:</p>
+          <ul>
+            <li>Rude behaviour from hotel staff.</li>
+            <li>Service issues from the agent or hotel.</li>
+            <li>Hotel cancellations due to unavoidable reasons.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="support_team">
+        <div class="heading">
+          <h1>Support team</h1>
+          <p>Contact no. - +91 8840165393</p>
+          <p>Email - nistha@tiwari@cotrav.co</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- footer image -->
+    <div class="footer-section">
+      <img src="./Assets/Footer.png" alt="">
+    </div>
+
+
+  </div>
+
+
+</body>
+
+</html>

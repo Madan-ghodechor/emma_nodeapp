@@ -29,6 +29,18 @@ const BookingLogs = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PaymentRecords'
         },
+        action: {
+            type: Boolean,
+            default: false
+        },
+        subscription: {
+            type: Boolean,
+            default: true
+        },
+        reminderCount: {
+            type: Number,
+            default: 0
+        },
         primaryUser: {
             type: mongoose.Schema.Types.Mixed,
         },

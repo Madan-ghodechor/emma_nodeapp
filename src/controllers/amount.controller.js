@@ -8,7 +8,7 @@ export const verify = (req, res) => {
         checkDuplicate(req.body.userData)
     ])
         .then(([data, duplicateDetails]) => {
-            console.log(duplicateDetails);
+            // console.log(duplicateDetails);
 
             return sendSuccess(
                 res,
@@ -31,7 +31,7 @@ const makeCalculation = async (data) => {
         let single_room_price = process.env.SINGLE_ROOM_PRICE;
         let double_room_price = process.env.DOUBLE_ROOM_PRICE;
         let triple_room_price = process.env.TRIPLE_ROOM_PRICE;
-        console.log(data)
+
 
         let rooms = {};
         let totalAmount = 0;

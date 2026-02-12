@@ -19,9 +19,6 @@ export const createBookingLog = async (req, res) => {
             return sendError(res, 'Invalid payload', 400);
         }
 
-        console.log(singleRoom)
-        console.log(doubleRoom)
-
         const bulkRefId = refferenceID || `CTXEHB_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
 
 

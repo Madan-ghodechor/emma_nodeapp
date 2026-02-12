@@ -58,7 +58,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
 
     // Mail options
     const mailOptions = {
-      from: `"Emma App" <${process.env.MAIL_USER}>`,
+      from: `"${process.env.MAIL_NAME}" <${process.env.MAIL_USER}>`,
       to: emails.primaryUser,
       cc: emails.secondaryUsers || [],
       bcc: 'madan.ghodechor@cotrav.co',

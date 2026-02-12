@@ -1,6 +1,6 @@
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import { addUsersService } from '../services/bulk.add.users.js';
-
+import Room from '../models/Room.model.js';
 
 export const createRoomsWithAttendees = async (req, res) => {
     try {
@@ -23,5 +23,23 @@ export const createRoomsWithAttendees = async (req, res) => {
     } catch (error) {
         console.error(error);
         return sendError(res, 'Failed to create rooms', 500, error.message);
+    }
+};
+
+
+export const getTotalRoomCount = async (req, res) => {
+    try {
+        const rooms = await Room.find()
+            .select('-attendees -paymentId -createdAt -updatedAt');
+
+        const count = rooms.length;
+
+        return sendSuccess(res, 'Rooms fetched successfully', {
+            "total_rooms" : count
+        });
+
+    } catch (error) {
+        console.error(error);
+        return sendError(res, 'Failed to fetch rooms', 500, error.message);
     }
 };
