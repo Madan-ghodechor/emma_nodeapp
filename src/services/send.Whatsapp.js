@@ -23,7 +23,7 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
 
             fs.writeFileSync(filePath, pdfBuffer);
 
-            documentLink = `${BASE_URL}/api/uploads/${fileName}`;
+            documentLink = `${BASE_URL}uploads/${fileName}`;
         }
 
         const load = {

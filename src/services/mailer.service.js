@@ -49,22 +49,14 @@ export const sendMail = async (emails, usersData, amount, status) => {
       })
     } else {
 
-    const formatDate = () => {
-        const dateStr = new Date().toLocaleDateString("en-GB", {
+      const formatDate = () => {
+        return new Date().toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "long",
           year: "numeric",
         });
-        const [year, month, day] = dateStr.split("/").map(Number);
+      };
 
-        const date = new Date(year, month - 1, day);
-
-        return date.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        });
-      }
 
       const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData)
       sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer)
