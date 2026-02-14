@@ -42,7 +42,7 @@ export const recordController = async (req, res) => {
 
         let refferenceID = bulkRefId;
         if (!!bulkRefId) {
-            count = await PaymentRecords.countDocuments();
+            const count = await PaymentRecords.countDocuments();
             refferenceID = generateBookingId(count)
         }
 

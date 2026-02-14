@@ -18,6 +18,15 @@ export const sendMail = async (emails, usersData, amount, status) => {
     let html = ''
     let hasAttachment;
 
+    const formatDate = () => {
+      return new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+    };
+
+    
     if (status == 'fail') {
 
       const host = process.env.RETRYLINK;
@@ -50,15 +59,6 @@ export const sendMail = async (emails, usersData, amount, status) => {
         retryPaymentUrl: url
       })
     } else {
-
-      const formatDate = () => {
-        return new Date().toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        });
-      };
-
 
       const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData)
       sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', bulkRefId)
