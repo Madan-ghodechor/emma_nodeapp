@@ -86,6 +86,7 @@ const findPrimaryUser = async (userdata) => {
     return {
         primaryUser,
         secondaryUsers,
-        guestName
+        guestName,
+        primaryUserWhatsapp
     }
 }

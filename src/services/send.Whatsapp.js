@@ -7,7 +7,7 @@ import axios from "axios";
 const BASE_URL = process.env.BASE_URL;
 // example: https://api.yoursite.com/uploads/booking-6f449537-9e6f-4947-b885-9187543d9fed.pdf
 
-export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name, pdfBuffer = null) => {
+export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name, pdfBuffer = null, template) => {
     try {
         let documentLink = null;
 
@@ -25,42 +25,76 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
 
             documentLink = `${BASE_URL}uploads/${fileName}`;
         }
+        const normalizePhone = (phone) => {
+            if (!phone) return phone;
+            return phone.startsWith("+") ? phone.slice(1) : phone;
+        };
 
-        const load = {
-            "to": primaryUserWhatsapp,
-            "data": {
-                "name": "eemahotel_booking_confirmation",
-                "language": {
-                    "code": "en"
-                },
-                "components": [
-                    {
-                        "type": "header",
-                        "parameters": [
-                            {
-                                "type": "document",
-                                "document": {
-                                    // "link": "https://cotrav.in/api/uploads/booking-6f449537-9e6f-4947-b885-9187543d9fed.pdf",
-                                    "link": documentLink,
-                                    "filename": "booking voucher.pdf"
-                                }
-                            }
-                        ]
+        const phone = normalizePhone(primaryUserWhatsapp);
+
+        let load;
+
+        if (template == 'success') {
+            load = {
+                "to": phone,
+                "data": {
+                    "name": "eemahotel_booking_confirmation",
+                    "language": {
+                        "code": "en"
                     },
-                    {
-                        "type": "body",
-                        "parameters": [
-                            {
-                                "type": "text",
-                                "text": Guest_Name
-                            },
-                            {
-                                "type": "text",
-                                "text": Booking_Date
-                            }
-                        ]
-                    }
-                ]
+                    "components": [
+                        {
+                            "type": "header",
+                            "parameters": [
+                                {
+                                    "type": "document",
+                                    "document": {
+                                        "link": documentLink,
+                                        "filename": "booking voucher.pdf"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "body",
+                            "parameters": [
+                                {
+                                    "type": "text",
+                                    "text": Guest_Name
+                                },
+                                {
+                                    "type": "text",
+                                    "text": Booking_Date
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        } else {
+            load = {
+                "to": phone,
+                "data": {
+                    "name": "eemahotel_booking_decline",
+                    "language": {
+                        "code": "en"
+                    },
+                    "components": [
+                        {
+                            "type": "body",
+                            "parameters": [
+                                {
+                                    "type": "text",
+                                    "text": Guest_Name
+                                },
+                                {
+                                    "type": "text",
+                                    "text": Booking_Date
+                                }
+                            ]
+                        }
+                    ]
+                }
             }
         }
 
@@ -68,13 +102,14 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
 
         const url = `https://pre-prod.cheerio.in/direct-apis/v1/whatsapp/template/send`;
 
-        const { data } = await axios.post(url, load, {
+        const { data } = await axios.post(url, JSON.stringify(load), {
             headers: {
-                Authorization: `Bearer ${token}`,
+                'x-api-key': token,
                 "Content-Type": "application/json"
             },
-            timeout: 10000
         });
+
+
 
 
         return { success: true, link: documentLink };

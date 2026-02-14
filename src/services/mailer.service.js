@@ -38,6 +38,8 @@ export const sendMail = async (emails, usersData, amount, status) => {
       })
       const url = host + token;
 
+      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, null, 'failed')
+
       html = paymentFailedTemplate({
         amount,
         bulkRefId,
@@ -59,7 +61,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
 
 
       const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData)
-      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer)
+      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success')
 
       hasAttachment = [
         {
