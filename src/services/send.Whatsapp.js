@@ -94,6 +94,7 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
             }
         }
 
+        // console.log(load)
         const token = process.env.WHATSAPP_TOKEN;
 
         const url = `https://pre-prod.cheerio.in/direct-apis/v1/whatsapp/template/send`;

@@ -26,7 +26,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
       });
     };
 
-    
+
     if (status == 'fail') {
 
       const host = process.env.RETRYLINK;
@@ -61,7 +61,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
     } else {
 
       const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData)
-      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', bulkRefId)
+      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
 
       hasAttachment = [
         {
