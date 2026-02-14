@@ -49,7 +49,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
       })
     } else {
 
-      formatDate = () => {
+    const formatDate = () => {
         const dateStr = new Date().toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "long",
