@@ -7,7 +7,7 @@ import Handlebars from 'handlebars';
 export let generateVoucher = async (req) => {
 
     // let data = {
-    //     "bookingId": "CTX123",
+    //     "bookingId": "",
     //     "createdAt": "13 Feb 2026",
     //     "primaryAttendeeName": "Madan Ghodechor",
     //     "primaryAttendeeEmail": "madan.ghodechor@cotrav.co",

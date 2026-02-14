@@ -7,7 +7,7 @@ import axios from "axios";
 const BASE_URL = process.env.BASE_URL;
 // example: https://api.yoursite.com/uploads/booking-6f449537-9e6f-4947-b885-9187543d9fed.pdf
 
-export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name, pdfBuffer = null, template) => {
+export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name, pdfBuffer = null, template, id = 'voucher') => {
     try {
         let documentLink = null;
 
@@ -50,7 +50,7 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
                                     "type": "document",
                                     "document": {
                                         "link": documentLink,
-                                        "filename": "booking voucher.pdf"
+                                        "filename": `${id}.pdf`
                                     }
                                 }
                             ]
@@ -86,10 +86,6 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
                                 {
                                     "type": "text",
                                     "text": Guest_Name
-                                },
-                                {
-                                    "type": "text",
-                                    "text": Booking_Date
                                 }
                             ]
                         }

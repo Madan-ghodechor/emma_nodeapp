@@ -3,13 +3,15 @@ import Company from '../models/Company.model.js';
 import User from '../models/User.model.js';
 import Room from '../models/Room.model.js';
 
-export const addUsersService = async (data, payment = null) => {
+export const addUsersService = async (data, payment = null, bulkRefIds = null) => {
     try {
 
+    
+
         const roomsPayload = data;
-        const bulkRefId = `CTXEHB_${Date.now()}_${crypto
-            .randomBytes(3)
-            .toString('hex')}`;
+        const bulkRefId = bulkRefIds;
+
+
 
         const createdRooms = [];
 

@@ -19,7 +19,18 @@ export const createBookingLog = async (req, res) => {
             return sendError(res, 'Invalid payload', 400);
         }
 
-        const bulkRefId = refferenceID || `CTXEHB_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+        const generateBookingId = (count) => {
+            const prefix = "SF26";
+            const width = 5;   // digits after prefix
+
+            const numberPart = String(count + 1).padStart(width, "0");
+
+            return prefix + numberPart;
+        };
+        const count = await BookingLogs.countDocuments();
+
+
+        const bulkRefId = refferenceID || generateBookingId(count);
 
 
         const log = await BookingLogs.findOneAndUpdate(

@@ -31,8 +31,23 @@ export const recordController = async (req, res) => {
             ...log._doc
         }
 
+        const generateBookingId = (count) => {
+            const prefix = "SF26";
+            const width = 5;   // digits after prefix
 
-        const registerPrimaryData = await addUsersService(userData, log);
+            const numberPart = String(count + 1).padStart(width, "0");
+
+            return prefix + numberPart;
+        };
+
+        let refferenceID = bulkRefId;
+        if (!!bulkRefId) {
+            count = await PaymentRecords.countDocuments();
+            refferenceID = generateBookingId(count)
+        }
+
+
+        const registerPrimaryData = await addUsersService(userData, log, refferenceID);
         await updatePaymentByBulkRefId(bulkRefId, log, amount, stage);
 
 
