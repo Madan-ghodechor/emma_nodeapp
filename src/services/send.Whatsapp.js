@@ -1,11 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
+import axios from "axios";
+
 
 const BASE_URL = process.env.BASE_URL;
-// example: https://api.yoursite.com
+// example: https://api.yoursite.com/uploads/booking-6f449537-9e6f-4947-b885-9187543d9fed.pdf
 
-export const sendWhatsapp = async (primaryUserWhatsapp, pdfBuffer = null) => {
+export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name, pdfBuffer = null) => {
     try {
         let documentLink = null;
 
@@ -21,45 +23,59 @@ export const sendWhatsapp = async (primaryUserWhatsapp, pdfBuffer = null) => {
 
             fs.writeFileSync(filePath, pdfBuffer);
 
-            documentLink = `${BASE_URL}/uploads/${fileName}`;
+            documentLink = `${BASE_URL}/api/uploads/${fileName}`;
         }
 
-        // build template payload
-        const payload = {
-            messaging_product: "whatsapp",
-            recipient_type: "individual",
-            to: primaryUserWhatsapp,
-            type: "template",
-            template: {
-                name: "eemahotel_booking_confirmation",
-                language: { code: "en" },
-                components: [
+        const load = {
+            "to": primaryUserWhatsapp,
+            "data": {
+                "name": "eemahotel_booking_confirmation",
+                "language": {
+                    "code": "en"
+                },
+                "components": [
                     {
-                        type: "header",
-                        parameters: [
+                        "type": "header",
+                        "parameters": [
                             {
-                                type: "document",
-                                document: {
-                                    link: documentLink,
-                                    filename: "booking.pdf"
+                                "type": "document",
+                                "document": {
+                                    // "link": "https://cotrav.in/api/uploads/booking-6f449537-9e6f-4947-b885-9187543d9fed.pdf",
+                                    "link": documentLink,
+                                    "filename": "booking voucher.pdf"
                                 }
                             }
                         ]
                     },
                     {
-                        type: "body",
-                        parameters: [
-                            { type: "text", text: "Madan" },
-                            { type: "text", text: "14 Feb 2026" }
+                        "type": "body",
+                        "parameters": [
+                            {
+                                "type": "text",
+                                "text": Guest_Name
+                            },
+                            {
+                                "type": "text",
+                                "text": Booking_Date
+                            }
                         ]
                     }
                 ]
             }
-        };
+        }
 
-        console.log(payload)
+        const token = process.env.WHATSAPP_TOKEN;
 
-        // call meta API here using axios / fetch
+        const url = `https://pre-prod.cheerio.in/direct-apis/v1/whatsapp/template/send`;
+
+        const { data } = await axios.post(url, load, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            timeout: 10000
+        });
+
 
         return { success: true, link: documentLink };
 

@@ -67,14 +67,16 @@ const updatePaymentByBulkRefId = async (
 
 const findPrimaryUser = async (userdata) => {
     let primaryUser = '';
-    let primaryUserWhatsapp;
     const secondaryUsers = [];
+    let primaryUserWhatsapp;
+    let guestName;
 
     for (let room of userdata) {
         for (let user of room.attendees) {
             if (user.is_primary_user) {
                 primaryUser = user.email;
                 primaryUserWhatsapp = user.phone;
+                guestName = user.firstName
             } else {
                 secondaryUsers.push(user.email);
             }
@@ -84,6 +86,6 @@ const findPrimaryUser = async (userdata) => {
     return {
         primaryUser,
         secondaryUsers,
-        primaryUserWhatsapp
+        guestName
     }
 }
