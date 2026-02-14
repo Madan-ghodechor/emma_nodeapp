@@ -26,6 +26,7 @@
     "nodemailer": "^8.0.0",
     "puppeteer": "^24.37.2",
     "razorpay": "^2.9.6",
+    "uuid": "^13.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

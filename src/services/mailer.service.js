@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import jwt from 'jsonwebtoken';
+import { generateVoucher } from '../voucher/generateVoucher.js'
+import { sendWhatsapp } from './send.Whatsapp.js'
 
 
 export const sendMail = async (emails, usersData, amount, status) => {
@@ -14,6 +16,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
     });
 
     let html = ''
+    let hasAttachment;
 
     if (status == 'fail') {
 
@@ -45,6 +48,18 @@ export const sendMail = async (emails, usersData, amount, status) => {
         retryPaymentUrl: url
       })
     } else {
+
+      const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData)
+      sendWhatsapp(emails.primaryUserWhatsapp, pdfBuffer)
+
+      hasAttachment = [
+        {
+          filename: 'voucher.pdf',
+          content: pdfBuffer,
+          contentType: 'application/pdf'
+        }
+      ]
+
       html = paymentSuccessTemplate({
         amount,
         bulkRefId: usersData.bulkRefId,
@@ -62,11 +77,12 @@ export const sendMail = async (emails, usersData, amount, status) => {
       to: emails.primaryUser,
       cc: emails.secondaryUsers || [],
       bcc: 'madan.ghodechor@cotrav.co',
-      subject: `Cotrav Hotel Booking - Payment ${status == 'faild' ? 'Failed' : 'Done'}`,
-      html: html
+      subject: `Payment ${status == 'fail' ? 'Payment Declined, Booking Still Pending' : 'Payment Successful'}`,
+      html: html,
+      attachments: hasAttachment
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    const info = transporter.sendMail(mailOptions);
 
     console.log("Mail sent:", info.messageId);
     return info;
@@ -207,6 +223,69 @@ ${roomsHtml}
 `;
 }
 
+async function getData(bulkRefId, userData) {
+
+  let primaryAttendeeName;
+  let primaryAttendeeEmail;
+
+  const attendees = userData[0].attendees.map(guest => {
+    if (guest.is_primary_user) {
+      primaryAttendeeEmail = guest.email
+      primaryAttendeeName = guest.firstName + ' ' + guest.lastName
+    }
+    return {
+      "name": guest?.firstName + ' ' + guest.lastName,
+      "email": guest?.email,
+      "phone": guest?.phone,
+    }
+  })
+
+  const formatToDDMMYY = (dateString) => {
+    const d = new Date(dateString);
+
+    const day = String(d.getDate()).padStart(2, '0');
+
+    const month = d.toLocaleString('en-IN', { month: 'short' });
+
+    const year = d.getFullYear();
+
+    return `${day} ${month} ${year}`;
+  }
+  const getTodayDDMonYYYY = () => {
+    const d = new Date();
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = d.toLocaleString('en-IN', { month: 'short' });
+    const year = d.getFullYear();
+
+    return `${day} ${month} ${year}`;
+  }
+
+
+
+  let roomtype = userData[0]?.roomtype;
+  let checkIn = formatToDDMMYY(userData[0]?.checkIn);
+  let checkOut = formatToDDMMYY(userData[0]?.checkOut);
+
+  let payload = {
+    "bookingId": bulkRefId,
+    "createdAt": getTodayDDMonYYYY(),
+    "primaryAttendeeName": primaryAttendeeName,
+    "primaryAttendeeEmail": primaryAttendeeEmail,
+    "rooms": [
+      {
+        "type": roomtype,   // Triple, Double, Single
+        "checkIn": checkIn,
+        "checkOut": checkOut,
+        "guests": attendees
+      }
+    ]
+  }
+  const pdfBuffer = await generateVoucher(payload);
+
+  return pdfBuffer
+}
+
 export function paymentSuccessTemplate(data) {
   const {
     amount,
@@ -218,7 +297,7 @@ export function paymentSuccessTemplate(data) {
   } = data;
 
   const roomsHtml = userData.map((room, index) => {
-  const roomNumber = index + 1;
+    const roomNumber = index + 1;
     const attendeesHtml = room.attendees.map(att => `
       <tr>
         <td style="font-size:12px;">${att.firstName} ${att.lastName}</td>

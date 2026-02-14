@@ -14,6 +14,8 @@ import logBookingAttempt from './routes/log.booking.attempt.routes.js';
 import paymentRecord from './routes/payment.record.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import { generateVoucher } from './voucher/generateVoucher.js'
+import path from "path";
+
 
 const app = express();
 
@@ -21,6 +23,9 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
+
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 
 app.get('/', (req, res) => {
   res.send('API is running ');

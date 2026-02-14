@@ -22,10 +22,17 @@
       color: #222;
     }
 
+    .page {
+      display: flex;
+      flex-direction: column;
+    }
+
     .voucher {
       margin: 20px;
+      margin-top: 0px;
       background: #ffffff;
       padding: 0px;
+      flex: 1;
 
 
       /* HEADER */
@@ -34,6 +41,7 @@
         justify-content: space-between;
         align-items: center;
         background-color: #ffffff;
+        padding: 15px;
 
         .logo {
           font-size: 22px;
@@ -230,14 +238,22 @@
 
       /* ATTENDEE */
       .attendee {
-        margin: 15px 0 15px;
+        margin: 20px 10px 20px;
         color: #000000;
         font-weight: 500;
 
         h3 {
           margin: 0px;
           font-size: 22px;
-          font-weight: 600;
+          font-weight: 500;
+        }
+
+        div {
+          width: 100%;
+
+          span {
+            margin-right: 23px;
+          }
         }
 
       }
@@ -267,6 +283,7 @@
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid #eee;
+            text-transform: capitalize;
           }
 
           .row {
@@ -281,7 +298,7 @@
               align-items: center;
 
               img {
-                width: 28px;
+                width: 25px;
               }
 
               span {
@@ -308,7 +325,11 @@
                 display: flex;
                 font-size: 15.60px;
                 flex-direction: column;
-                width: 50%;
+                width: 40%;
+
+                &:nth-child(1) {
+                  width: 60%;
+                }
 
                 div {
                   display: flex;
@@ -316,12 +337,16 @@
                   margin-top: 2px;
 
                   img {
-                    width: 28px;
+                    width: 25px;
                   }
 
                   span {
                     margin-left: 15px;
                   }
+                }
+
+                .guestName {
+                  text-transform: capitalize;
                 }
               }
             }
@@ -336,11 +361,12 @@
         padding: 10px;
 
         .heading {
-          break-inside: avoid;
-          page-break-inside: avoid;
+          /* break-inside: avoid;
+          page-break-inside: avoid; */
 
           h1 {
             font-size: 20px;
+            font-weight: 500;
           }
 
           p,
@@ -349,15 +375,26 @@
             margin: 0px;
           }
         }
+
+        .terms_and_condition {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
       }
 
-      /* FOOTER SECTION */
-      .footer-section {
-        width: 100%;
+    }
 
-        img {
-          width: 100%;
-        }
+    /* FOOTER SECTION */
+    .footer-section {
+      width: 100%;
+      /* min-height: 394px; */
+      /* Triple sharing */
+      display: flex;
+      align-items: end;
+
+
+      img {
+        width: 100%;
       }
     }
   </style>
@@ -369,205 +406,181 @@
   <div class="page-border"></div>
 
 
-  <div class="voucher">
+  <div class="page">
 
-    <!-- header -->
-    <div class="top-bar">
-      <img src="./Assets/header.svg" alt="">
-    </div>
+    <div class="voucher">
 
-    <!-- title -->
-    <div class="title">HOTEL CONFIRMATION VOUCHER</div>
+      <!-- header -->
+      <div class="top-bar">
+        <img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/header.svg" alt="">
+      </div>
 
-    <div class="booking-id">
-      Booking ID: TVTESTHTL53426
-    </div>
+      <!-- title -->
+      <div class="title">HOTEL CONFIRMATION VOUCHER</div>
 
-    <div class="booked">Booked on: 10 Feb 2026</div>
+      <div class="booking-id">
+        Booking ID: {{bookingId}}
+      </div>
 
-    <!-- hotel -->
-    <div class="hotel-box">
-      <div class="top-left-corner inwardCuts"></div>
-      <div class="top-right-corner inwardCuts"></div>
-      <div class="bottom-left-corner inwardCuts"></div>
-      <div class="bottom-right-corner inwardCuts"></div>
+      <div class="booked">Booked on: {{createdAt}}</div>
 
-      <div class="hotel-content">
-        <div class="hotel-left">
-          <div class="hotel-name">Pragati Resorts</div>
-          <div class="hotel-address">
-            Chilkur Balaji Temple Road, Proddutur Village, Ranga Reddy District,
-            Hyderabad, 501504, Telangana
-          </div>
+      <!-- hotel -->
+      <div class="hotel-box">
+        <div class="top-left-corner inwardCuts"></div>
+        <div class="top-right-corner inwardCuts"></div>
+        <div class="bottom-left-corner inwardCuts"></div>
+        <div class="bottom-right-corner inwardCuts"></div>
 
-          <div class="hotel-contact">
-            <div> <img src="./Assets/phone.svg" alt=""> <span>96200 74317 </span> </div>
-            <div> <img src="./Assets/mail.svg" alt=""> <span>reservation@pragatiresorts.com </span> </div>
-          </div>
-        </div>
+        <div class="hotel-content">
+          <div class="hotel-left">
+            <div class="hotel-name">Pragati Resorts</div>
+            <div class="hotel-address">
+              Chilkur Balaji Temple Road, Proddutur Village, Ranga Reddy District,
+              Hyderabad, 501504, Telangana
+            </div>
 
-        <div class="hotel-right">
-          <div class="confirmed"> <img src="./Assets/Checkmark.svg" alt="tick"> CONFIRMED</div>
-          <div class="google-location">
-            <a class="content" href="https://cotrav.in" target="_blank">
-              <div class="icon">
-                <img src="./Assets/location.svg" alt="location icon">
+            <div class="hotel-contact">
+              <div> <img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/phone.svg" alt="">
+                <span>7353963586</span>
               </div>
-              <div class="name">
-                Google Location
+              <div> <img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/mail.svg" alt="">
+                <span>info@eemaindia.com</span>
               </div>
-            </a>
+            </div>
+          </div>
+
+          <div class="hotel-right">
+            <div class="confirmed"> <img
+                src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/Checkmark.svg" alt="tick">
+              CONFIRMED</div>
+            <div class="google-location">
+              <a class="content"
+                href="https://www.google.com/maps/place/Pragati+Resorts/@17.3881306,78.1628717,15z/data=!3m1!4b1!4m9!3m8!1s0x3bcbe96a61859b0f:0x488bc5b225454cc6!5m2!4m1!1i2!8m2!3d17.388111!4d78.1813258!16s%2Fg%2F1tdrvsgv?entry=ttu&g_ep=EgoyMDI2MDIxMC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank">
+                <div class="icon">
+                  <img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/location.svg"
+                    alt="location icon">
+                </div>
+                <div class="name">
+                  Google Location
+                </div>
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- attendee -->
-    <div class="attendee">
-      <h3>Primary Attendee</h3>
-      <div>Name: Madan Ghodechor Email: madan.ghodechor@cotrav.co</div>
-    </div>
+      <!-- attendee -->
+      <div class="attendee">
+        <h3>Primary Attendee</h3>
+        <div> <span>Name: {{primaryAttendeeName}}</span> <span> Email: {{primaryAttendeeEmail}}</span> </div>
+      </div>
 
-    <!-- room 1 -->
-    <div class="room">
-      <div class="room-strip"></div>
-      <div class="room-content">
-        <div class="room-title">Room 1 - Single Occupancy</div>
+      <!-- room -->
+      {{#each rooms}}
+      <div class="room">
+        <div class="room-strip"></div>
+        <div class="room-content">
+          <div class="room-title">Room 1 - {{type}} Occupancy</div>
 
-        <div class="row">
-          <div><img src="./Assets/checkIn.svg" alt="📅"> <span> Check-in: 23 Mar 2026 </span></div>
-          <div><img src="./Assets/checkOut.svg" alt="➡"> <span> Check-out: 25 Mar 2026 </span></div>
+          <div class="row">
+            <div><img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/checkIn.svg" alt="📅">
+              <span> Check-in: {{checkIn}} </span>
+            </div>
+            <div><img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/checkOut.svg" alt="➡">
+              <span> Check-out: {{checkOut}} </span>
+            </div>
+          </div>
+
+          {{#each guests}}
+          <div class="guest-loop">
+            <div class="label">Guest {{inc @index}}</div>
+            <div class="guest">
+              <div class="details">
+                <div><img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/profile.svg"
+                    alt="👤"> <span class="guestName"> {{name}} </span></div>
+                <div><img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/mail.svg" alt="✉">
+                  <span> {{email}} </span>
+                </div>
+              </div>
+              <div class="details">
+                <div><img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/meal.svg"
+                    alt="🍽">
+                  <span> Meal Plan - APAI </span>
+                </div>
+                <div><img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/phone.svg"
+                    alt="📞">
+                  <span> {{phone}} </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {{/each}}
+
         </div>
+      </div>
+      {{/each}}
 
-        <div class="guest-loop">
-          <div class="label">Guest 1</div>
-          <div class="guest">
-            <div class="details">
-              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
-              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
-            </div>
-            <div class="details">
-              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
-              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
-            </div>
+
+      <!-- Static Details Section -->
+      <div class="static-details">
+        <div class="general-hotel-policy">
+          <div class="heading">
+            <h1>General Hotel Policy</h1>
+            <ul>
+              <li>The Standard check-in time: 11:00 AM </li>
+              <li>The Standard check-out time: 11:00 AM </li>
+              <li>Early check-in or late check-out is subject to availability and may incur additional
+                charges.</li>
+              <li>Upon confirmation of the booking the reservation become non-refundable. Any
+                Cancellation, amendment or no show 100% of the total booking amount shall be
+                charged as cancellation fees.</li>
+              <li>Any request for early check-in or late check-out must be confirmed directly with
+                the hotel.</li>
+              <li>Please make sure to bring a printed copy when you check in at hotel.</li>
+              <li>All guests are required to present valid ID proof at check-in.</li>
+
+              <li>Cotrav is not responsible for any changes in the hotel’s check-in, check-out, or
+                other policies.</li>
+            </ul>
           </div>
         </div>
 
-      </div>
-    </div>
-
-    <!-- room 2 -->
-    <div class="room">
-      <div class="room-strip"></div>
-      <div class="room-content">
-        <div class="room-title">Room 1 - Single Occupancy</div>
-
-        <div class="row">
-          <div><img src="./Assets/checkIn.svg" alt="📅"> <span> Check-in: 23 Mar 2026 </span></div>
-          <div><img src="./Assets/checkOut.svg" alt="➡"> <span> Check-out: 25 Mar 2026 </span></div>
-        </div>
-
-        <div class="guest-loop">
-          <div class="label">Guest 1</div>
-          <div class="guest">
-            <div class="details">
-              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
-              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
-            </div>
-            <div class="details">
-              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
-              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
-            </div>
+        <div class="terms_and_condition">
+          <div class="heading">
+            <h1>Terms & Conditions</h1>
+            <p>The South Factor provides a platform to facilitate transactions between agents, clients,
+              users, and customers. The South Factor is responsible for:</p>
+            <ul>
+              <li>Issuing a valid hotel voucher (accepted by the hotel).</li>
+              <li>Offering support in case of cancellations.</li>
+              <li>Providing customer support and assistance if needed.</li>
+            </ul>
+            <p>The South Factor is not responsible for:</p>
+            <ul>
+              <li>Rude behaviour from hotel staff.</li>
+              <li>Service issues from the agent or hotel.</li>
+              <li>Hotel cancellations due to unavoidable reasons.</li>
+            </ul>
           </div>
         </div>
-        <div class="guest-loop">
-          <div class="label">Guest 1</div>
-          <div class="guest">
-            <div class="details">
-              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
-              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
-            </div>
-            <div class="details">
-              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
-              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
-            </div>
+        <div class="support_team">
+          <div class="heading">
+            <h1>Support team</h1>
+            <p>Contact no. - +91 8840165393</p>
+            <p>Email - nistha.tiwari@cotrav.co</p>
           </div>
         </div>
-        <div class="guest-loop">
-          <div class="label">Guest 1</div>
-          <div class="guest">
-            <div class="details">
-              <div><img src="./Assets/profile.svg" alt="👤"> <span> Tanuja Pawar </span></div>
-              <div><img src="./Assets/mail.svg" alt="✉"> <span> tanuja.pawar@cotrav.co </span></div>
-            </div>
-            <div class="details">
-              <div><img src="./Assets/meal.svg" alt="🍽"> <span> Meal Plan - APAI </span></div>
-              <div><img src="./Assets/phone.svg" alt="📞"> <span> +919309804107 </span></div>
-            </div>
-          </div>
-        </div>
+      </div>
 
-      </div>
-    </div>
-
-    <!-- Static Details Section -->
-    <div class="static-details">
-      <div class="general-hotel-policy">
-        <div class="heading">
-          <h1>General Hotel Policy</h1>
-          <ul>
-            <li>The Standard check-in time: 12:00 PM </li>
-            <li>The Standard check-out time: 12:00 PM </li>
-            <li>Early check-in or late check-out is subject to availability and may incur additional
-              charges.</li>
-            <li>The Standard cancellation charges will apply as per the contract or as communicated at the
-              time of booking.</li>
-            <li>Any request for early check-in or late check-out must be confirmed directly with the hotel.
-            </li>
-            <li>All guests are required to present valid ID proof at check-in.</li>
-            <li>Locals (within a 30 km radius) and unmarried couples are not allowed. </li>
-            <li>Most hotels do not permit check-in for unmarried or unrelated couples. This decision is at
-              the discretion of hotel management, and no refund will be issued if check-in is denied under
-              such circumstances. </li>
-            <li>Cotrav is not responsible for any changes in the hotel’s check-in, check-out, or other
-              policies.</li>
-          </ul>
-        </div>
-      </div>
-      <div class="terms_and_condition">
-        <div class="heading">
-          <h1>Terms & Conditions</h1>
-          <p>The South Factor provides a platform to facilitate transactions between agents, clients, users,
-            and customers. The South Factor is responsible for:</p>
-          <ul>
-            <li>Issuing a valid hotel voucher (accepted by the hotel).</li>
-            <li>Offering support in case of cancellations.</li>
-            <li>Providing customer support and assistance if needed.</li>
-          </ul>
-          <p>The South Factor is not responsible for:</p>
-          <ul>
-            <li>Rude behaviour from hotel staff.</li>
-            <li>Service issues from the agent or hotel.</li>
-            <li>Hotel cancellations due to unavoidable reasons.</li>
-          </ul>
-        </div>
-      </div>
-      <div class="support_team">
-        <div class="heading">
-          <h1>Support team</h1>
-          <p>Contact no. - +91 8840165393</p>
-          <p>Email - nistha@tiwari@cotrav.co</p>
-        </div>
-      </div>
     </div>
 
     <!-- footer image -->
-    <div class="footer-section">
-      <img src="./Assets/Footer.png" alt="">
+    <div class="footer-section" style="min-height: ConditionalfooterHeight;">
+      <img src="https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/Footer.png" alt="">
     </div>
-
-
   </div>
+
 
 
 </body>

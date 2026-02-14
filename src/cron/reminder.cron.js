@@ -22,24 +22,24 @@ export const bookingReminderCron = () => {
                 console.log('Running room reminder cron...');
 
 
-                const logs = await BookingLogs.find();
+                // const logs = await BookingLogs.find(); 
+                const logs = await BookingLogs.find({ stage: { $lt: 5 } });
+
 
                 for (const record of logs) {
 
-                    if (record.stage < 5) {
-                        const payload = {
-                            paymentLink: process.env.COMPLETEPROCESS + record.bulkRefId,
-                            name: record.primaryUser.firstName,
-                            email: record.primaryUser.email
-                        }
-                        const mail_status = await reminderMail(payload);
-                        if (mail_status?.messageId) {
-                            await BookingLogs.updateMany(
-                                { bulkRefId: record.bulkRefId },
-                                { $inc: { reminderCount: 1 } }
-                            );
+                    const payload = {
+                        paymentLink: process.env.COMPLETEPROCESS + record.bulkRefId,
+                        name: record.primaryUser.firstName,
+                        email: record.primaryUser.email
+                    }
+                    const mail_status = await reminderMail(payload);
+                    if (mail_status?.messageId) {
+                        await BookingLogs.updateMany(
+                            { bulkRefId: record.bulkRefId },
+                            { $inc: { reminderCount: 1 } }
+                        );
 
-                        }
                     }
 
                 }

@@ -1,20 +1,20 @@
 import nodemailer from "nodemailer";
 
 export const reminderMail = async (data) => {
-    try {
+  try {
 
-        const { name, paymentLink, email } = data;
+    const { name, paymentLink, email } = data;
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.MAIL_USER,
-                pass: process.env.MAIL_PASS
-            }
-        });
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS
+      }
+    });
 
 
-        const html = `
+    const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,16 +38,15 @@ export const reminderMail = async (data) => {
           <!-- Body -->
           <tr>
             <td style="padding:30px; color:#333333; font-size:14px; line-height:22px;">
-              <p style="margin-top:0;">Dear ${name},</p>
+              <p style="margin-top:0;">Hi ${name},</p>
 
               <p>
-                This is a gentle reminder regarding your hotel registration for 
-                <strong>South Factor</strong>.
+                This is a reminder to complete your registration for the South Factor EEMA event.
               </p>
 
               <p>
-                Room occupancy is filling up quickly, and we noticed that your payment 
-                is still pending, which means your room is not yet confirmed.
+                Your booking at Pragati Resort is currently pending. Kindly secure your stay by completing
+                the registration at the earliest.
               </p>
 
               <p>
@@ -64,7 +63,10 @@ export const reminderMail = async (data) => {
               </p>
 
               <p>
-                Should you need any support, Team Cotrav is here to assist.
+                For any assistance, contact person: Nistha | 8840165393.
+              </p>
+              <p>
+                We look forward to welcoming you.
               </p>
 
               <p style="margin-bottom:0;">
@@ -82,20 +84,20 @@ export const reminderMail = async (data) => {
 </html>
     `;
 
-        const mailOptions = {
-            from: `"${process.env.MAIL_NAME}" <${process.env.MAIL_USER}>`,
-            to: email,
-            bcc: 'madan.ghodechor@cotrav.co',
-            subject: "Action Required: Confirm Your South Factor Stay",
-            html
-        };
+    const mailOptions = {
+      from: `"${process.env.MAIL_NAME}" <${process.env.MAIL_USER}>`,
+      to: email,
+      bcc: 'madan.ghodechor@cotrav.co',
+      subject: "Reminder: Complete Your Registration – South Factor EEMA",
+      html
+    };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Admin mail sent:", info.messageId);
-        return info;
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Admin mail sent:", info.messageId);
+    return info;
 
-    } catch (error) {
-        console.error("Mail error:", error);
-        throw error;
-    }
+  } catch (error) {
+    console.error("Mail error:", error);
+    throw error;
+  }
 };
