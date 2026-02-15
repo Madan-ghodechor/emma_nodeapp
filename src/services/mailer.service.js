@@ -88,7 +88,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
       to: emails.primaryUser,
       cc: emails.secondaryUsers || [],
       bcc: 'madan.ghodechor@cotrav.co',
-      subject: `Payment ${status == 'fail' ? 'Payment Declined, Booking Still Pending' : 'Payment Successful'}`,
+      subject: `Payment ${status == 'fail' ? 'Declined, Booking Still Pending' : 'Successful'}`,
       html: html,
       attachments: hasAttachment
     };
