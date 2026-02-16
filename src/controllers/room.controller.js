@@ -32,10 +32,8 @@ export const getTotalRoomCount = async (req, res) => {
         const rooms = await Room.find()
             .select('-attendees -paymentId -createdAt -updatedAt');
 
-        const count = rooms.length;
-
         return sendSuccess(res, 'Rooms fetched successfully', {
-            "total_rooms" : count
+            "total_rooms" : rooms
         });
 
     } catch (error) {
