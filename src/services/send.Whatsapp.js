@@ -38,7 +38,7 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
             load = {
                 "to": phone,
                 "data": {
-                    "name": "eemahotel_booking_confirmation",
+                    "name": "eema_hotel_success",
                     "language": {
                         "code": "en"
                     },

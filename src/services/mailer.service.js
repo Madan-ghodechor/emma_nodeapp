@@ -65,7 +65,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
 
       hasAttachment = [
         {
-          filename: 'voucher.pdf',
+          filename: `${usersData.bulkRefId}.pdf`,
           content: pdfBuffer,
           contentType: 'application/pdf'
         }
@@ -130,7 +130,7 @@ export function paymentFailedTemplate(data) {
         style="border:1px solid #e0e0e0;border-radius:6px;margin-bottom:12px;">
         
         <tr style="background:#f9fafb;">
-          <td colspan="2" style="font-size:14px;font-weight:bold;">
+          <td colspan="2" style="font-size:14px;font-weight:bold; text-transform: capitalize;">
             Room ${roomNumber}: ${room.roomtype} occupancy
           </td>
         </tr>
@@ -322,7 +322,7 @@ export function paymentSuccessTemplate(data) {
         style="border:1px solid #e0e0e0;border-radius:6px;margin-bottom:12px;">
         
         <tr style="background:#f3fdf6;">
-          <td colspan="2" style="font-size:14px;font-weight:bold;">
+          <td colspan="2" style="font-size:14px;font-weight:bold; text-transform: capitalize;">
             Room ${roomNumber}: ${room.roomtype} occupancy
           </td>
         </tr>
