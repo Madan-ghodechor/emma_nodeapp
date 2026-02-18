@@ -7,6 +7,7 @@ import { loginMail } from "../services/login.main.service.js";
 import Room from '../models/Room.model.js';
 import User from '../models/User.model.js';
 import PaymentRecords from '../models/Payment.model.js';
+import Company from '../models/Company.model.js';
 
 
 
@@ -131,13 +132,51 @@ export const login = async (req, res) => {
 export const getDashboard = async (req, res) => {
     try {
 
-        const rooms = await getRooms();
-        const users = await getUsersInternal();
         const totelAmount = await getTotalAmount();
+        const payments = await getPaymentRecords();
+        const rawrooms = await getRooms();
+        const companies = await getCompanies();
+        const AllUsers = await getUsersInternal();
+
+        const roomsData = rawrooms.map(room => {
+            const paymentsData = payments.find(payment =>
+                String(payment._id) === String(room.paymentId)
+            );
+
+            return {
+                ...room?._doc,
+                payment: paymentsData || null
+            };
+        });
+
+        const users = AllUsers.map(user => {
+            const companyData = companies.find(company =>
+                String(company._id) === String(user.company)
+            );
+
+            return {
+                ...user?._doc,
+                company: companyData || null
+            };
+        });
+
+        const rooms = roomsData.map(room => {
+            const attendees = room.attendees.map(id =>
+                users.find(user =>
+                    String(id) === String(user._id)
+                )
+            ).filter(Boolean);
+
+            return {
+                ...room,
+                attendees
+            };
+        });
+
 
         return sendSuccess(res, 'Dashbord fetch successful', {
             rooms,
-            user_count: users,
+            user_count: users.length,
             totelAmount
         });
 
@@ -162,9 +201,9 @@ const getRooms = async () => {
 
 const getUsersInternal = async () => {
     try {
-        const users = await User.find().select('_id');
+        const users = await User.find().select();
 
-        return users.length;
+        return users;
 
     } catch (error) {
         console.error(error);
@@ -188,6 +227,29 @@ const getTotalAmount = async () => {
         return null;
     }
 };
+const getPaymentRecords = async () => {
+    try {
+        const payments = await PaymentRecords.find().select('_id razorpay_payment_id paymentAmount');
+
+        return payments;
+
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+const getCompanies = async () => {
+    try {
+        const companies = await Company.find().select('_id name gst');
+
+        return companies;
+
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
 
 
 
@@ -203,6 +265,7 @@ export const getUsers = async (req, res) => {
         return sendError(res, 'Admin: Failed to fetch rooms', 500, error.message);
     }
 };
+
 export const getPaymentByID = async (req, res) => {
     try {
         const { id } = req.params;
@@ -221,4 +284,3 @@ export const getPaymentByID = async (req, res) => {
         return sendError(res, 'Failed to fetch payment', 500, error.message);
     }
 };
-
