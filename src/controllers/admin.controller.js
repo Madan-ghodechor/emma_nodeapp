@@ -4,13 +4,15 @@ import jwt from 'jsonwebtoken';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import crypto from 'crypto';
 import { loginMail } from "../services/login.main.service.js";
+import Room from '../models/Room.model.js';
+import User from '../models/User.model.js';
+import PaymentRecords from '../models/Payment.model.js';
 
 
 
 
 const generatePassword = () => {
     return crypto.randomBytes(8).toString('hex');
-    // 16 char random password
 };
 
 export const createAdmin = async (req, res) => {
@@ -100,7 +102,7 @@ export const login = async (req, res) => {
         if (!isMatch) {
             return sendError(res, 'Invalid credentials');
         }
-        
+
         // create JWT
         const token = jwt.sign(
             {
@@ -123,6 +125,100 @@ export const login = async (req, res) => {
     } catch (error) {
         console.log(error)
         return sendError(res, error.message);
+    }
+};
+
+export const getDashboard = async (req, res) => {
+    try {
+
+        const rooms = await getRooms();
+        const users = await getUsersInternal();
+        const totelAmount = await getTotalAmount();
+
+        return sendSuccess(res, 'Dashbord fetch successful', {
+            rooms,
+            user_count: users,
+            totelAmount
+        });
+
+    } catch (error) {
+        console.log(error)
+        return sendError(res, error.message);
+    }
+}
+
+
+const getRooms = async () => {
+    try {
+        const rooms = await Room.find().select('-updatedAt -__v');
+
+        return rooms;
+
+    } catch (error) {
+        console.error(error);
+        return sendError(res, 'Admin: Failed to fetch rooms', 500, error.message);
+    }
+};
+
+const getUsersInternal = async () => {
+    try {
+        const users = await User.find().select('_id');
+
+        return users.length;
+
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+const getTotalAmount = async () => {
+    try {
+        const payments = await PaymentRecords.find().select('paymentAmount');
+        let amount = 0;
+
+        for (let record of payments) {
+            amount += record.paymentAmount
+        }
+
+        return amount;
+
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+
+
+export const getUsers = async (req, res) => {
+    try {
+        const users = await User.find().select('-updatedAt -__v');
+        return sendSuccess(res, 'Dashbord fetch successful', {
+            users
+        });
+
+    } catch (error) {
+        console.error(error);
+        return sendError(res, 'Admin: Failed to fetch rooms', 500, error.message);
+    }
+};
+export const getPaymentByID = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const payment = await PaymentRecords.findById(id);
+
+
+        if (!payment) {
+            return sendError(res, 'Payment not found', 404);
+        }
+
+        return sendSuccess(res, 'Payment fetch successful', payment);
+
+    } catch (error) {
+        console.error(error);
+        return sendError(res, 'Failed to fetch payment', 500, error.message);
     }
 };
 
