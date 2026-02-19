@@ -56,8 +56,8 @@ const updatePaymentByBulkRefId = async (
         { bulkRefId },
         {
             $set: {
-                payment: 2,              // failed
-                paymentId: paymentId,    // ObjectId
+                payment: 2,
+                paymentId: paymentId,
                 paymentAmount,
                 stage
             }

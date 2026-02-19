@@ -19,18 +19,28 @@ export const createBookingLog = async (req, res) => {
             return sendError(res, 'Invalid payload', 400);
         }
 
-        const generateBookingId = (count) => {
+        const generateBookingId = async () => {
             const prefix = "SF26";
-            const width = 5;   // digits after prefix
+            const width = 5;
 
-            const numberPart = String(count + 1).padStart(width, "0");
+            const lastRecord = await BookingLogs
+                .findOne({ bulkRefId: { $regex: `^${prefix}` } })
+                .sort({ bulkRefId: -1 })  // safe because padded
+                .select("bulkRefId");
 
-            return prefix + numberPart;
+            let nextNumber = 1;
+
+            if (lastRecord && lastRecord.bulkRefId) {
+                const lastNumber = parseInt(lastRecord.bulkRefId.replace(prefix, ""));
+                nextNumber = lastNumber + 1;
+            }
+
+            return prefix + String(nextNumber).padStart(width, "0");
         };
-        const count = await BookingLogs.countDocuments();
 
 
-        const bulkRefId = refferenceID || generateBookingId(count);
+        const bulkRefId = refferenceID || await generateBookingId();
+
 
 
         const log = await BookingLogs.findOneAndUpdate(
