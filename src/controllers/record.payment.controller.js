@@ -31,19 +31,33 @@ export const recordController = async (req, res) => {
             ...log._doc
         }
 
-        const generateBookingId = (count) => {
+
+        const generateBookingId = async () => {
             const prefix = "SF26";
-            const width = 5;   // digits after prefix
+            const width = 5;
 
-            const numberPart = String(count + 1).padStart(width, "0");
+            const lastRecord = await BookingLogs
+                .findOne({ bulkRefId: { $regex: `^${prefix}` } })
+                .sort({ bulkRefId: -1 })
+                .select("bulkRefId");
 
-            return prefix + numberPart;
+            let nextNumber = 1;
+
+            if (lastRecord && lastRecord.bulkRefId) {
+                const lastNumber = parseInt(lastRecord.bulkRefId.replace(prefix, ""));
+                nextNumber = lastNumber + 1;
+            }
+
+            return prefix + String(nextNumber).padStart(width, "0");
         };
+
+
+
+
 
         let refferenceID = bulkRefId;
         if (!!bulkRefId) {
-            const count = await PaymentRecords.countDocuments();
-            refferenceID = generateBookingId(count)
+            refferenceID = await generateBookingId()
         }
 
 
