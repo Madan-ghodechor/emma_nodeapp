@@ -11,6 +11,7 @@ export const addUsersService = async (data, payment = null, bulkRefIds = null) =
         const roomsPayload = data;
         const bulkRefId = bulkRefIds;
 
+        console.log(bulkRefId)
 
 
         const createdRooms = [];

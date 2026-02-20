@@ -52,13 +52,10 @@ export const recordController = async (req, res) => {
         };
 
 
-
-
-
         let refferenceID = bulkRefId;
-        if (!!bulkRefId) {
-            refferenceID = await generateBookingId()
-        }
+        // if (!!bulkRefId) {
+        //     refferenceID = await generateBookingId()
+        // }
 
 
         const registerPrimaryData = await addUsersService(userData, log, refferenceID);
