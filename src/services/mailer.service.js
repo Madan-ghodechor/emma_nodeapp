@@ -7,6 +7,8 @@ import { sendWhatsapp } from './send.Whatsapp.js'
 export const sendMail = async (emails, usersData, amount, status) => {
   try {
 
+    const whiteLabel = usersData.whiteLabel;
+    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -60,7 +62,8 @@ export const sendMail = async (emails, usersData, amount, status) => {
       })
     } else {
 
-      const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData)
+      const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData, whiteLabel)
+      
       sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
 
       hasAttachment = [
@@ -234,7 +237,7 @@ ${roomsHtml}
 `;
 }
 
-async function getData(bulkRefId, userData) {
+async function getData(bulkRefId, userData, whiteLabel) {
 
   let primaryAttendeeName;
   let primaryAttendeeEmail;
@@ -272,8 +275,6 @@ async function getData(bulkRefId, userData) {
     return `${day} ${month} ${year}`;
   }
 
-
-
   let roomtype = userData[0]?.roomtype;
   let checkIn = formatToDDMMYY(userData[0]?.checkIn);
   let checkOut = formatToDDMMYY(userData[0]?.checkOut);
@@ -290,7 +291,8 @@ async function getData(bulkRefId, userData) {
         "checkOut": checkOut,
         "guests": attendees
       }
-    ]
+    ],
+    whiteLabel
   }
   const pdfBuffer = await generateVoucher(payload);
 

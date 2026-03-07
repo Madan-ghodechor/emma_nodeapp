@@ -8,6 +8,7 @@ import Room from '../models/Room.model.js';
 import User from '../models/User.model.js';
 import PaymentRecords from '../models/Payment.model.js';
 import Company from '../models/Company.model.js';
+import whiteLabelCompanySchema from '../models/white.labaled.company.js';
 
 
 
@@ -282,5 +283,77 @@ export const getPaymentByID = async (req, res) => {
     } catch (error) {
         console.error(error);
         return sendError(res, 'Failed to fetch payment', 500, error.message);
+    }
+};
+
+
+//**************** White Label Methods ******************//
+export const createWhiteLabel = async (req, res) => {
+    try {
+        const { name, industry, region, color, abbr } = req.body;
+
+        // ─── VALIDATION ─────────────────────────────
+        if (!name || !abbr) {
+            return res.status(400).json({
+                success: false,
+                message: "name and abbr are required"
+            });
+        }
+
+        // prevent duplicate abbreviation
+        const existing = await whiteLabelCompanySchema.findOne({ abbr });
+
+        if (existing) {
+            return res.status(409).json({
+                success: false,
+                message: "Company with this abbreviation already exists"
+            });
+        }
+
+        // ─── CREATE DOCUMENT ────────────────────────
+        const company = await whiteLabelCompanySchema.create({
+            name,
+            industry,
+            region,
+            color,
+            abbr
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "White label company created",
+            data: company
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to create white label company",
+            error: error.message
+        });
+    }
+};
+export const getAllWhiteLabels = async (req, res) => {
+    try {
+
+        const companies = await WhiteLabelCompany
+            .find({})
+            .sort({ name: 1 }); // optional sorting
+
+        return res.status(200).json({
+            success: true,
+            count: companies.length,
+            data: companies
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch white label companies",
+            error: error.message
+        });
     }
 };

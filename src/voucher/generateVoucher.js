@@ -25,7 +25,15 @@ export let generateVoucher = async (req) => {
     //     ]
     // }
 
-    const data = req;
+
+    const data = {
+        ...req,
+        headerLogo1: req?.whiteLabel?.assets?.headerFirstLogoUrl,
+        headerLogo2: req?.whiteLabel?.assets?.headerSecondLogoUrl,
+        headerLogo3: req?.whiteLabel?.assets?.headerThirdLogoUrl,
+        themeMainColor: req?.whiteLabel?.themeMainColor,
+        themeSecondaryColor: req?.whiteLabel?.themeSecondaryColor,
+    };
 
     let browser = await puppeteer.launch({
         headless: 'new',
@@ -54,6 +62,16 @@ export let generateVoucher = async (req) => {
     html = html.replace('{{primaryAttendeeName}}', data.primaryAttendeeName);
     html = html.replace('{{primaryAttendeeEmail}}', data.primaryAttendeeEmail);
 
+    html = html.replace('{{headerLogo}}', data.headerLogo);
+
+    html = html.replace('{{headerLogo1}}', data.headerLogo1);
+    html = html.replace('{{headerLogo2}}', data.headerLogo2);
+    html = html.replace('{{headerLogo3}}', data.headerLogo3);
+
+    html = html.replaceAll('var(--mainThemeColor)', data.themeMainColor);
+    html = html.replaceAll('var(--secondThemeColor)', data.themeSecondaryColor);
+
+
     if (data.rooms[0].type == 'Triple' || data.rooms[0].type == 'triple') {
         html = html.replace('ConditionalfooterHeight', '457px');  // Triple Sharing
     } else if (data.rooms[0].type == 'Double' || data.rooms[0].type == 'double') {
@@ -61,7 +79,6 @@ export let generateVoucher = async (req) => {
     } else {
         html = html.replace('ConditionalfooterHeight', '639px');  // Single Sharing
     }
-
 
 
     await page.setContent(html, { waitUntil: 'networkidle0' });

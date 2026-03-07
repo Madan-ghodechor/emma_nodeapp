@@ -13,7 +13,9 @@ import amountverification from './routes/amount.verification.routes.js';
 import logBookingAttempt from './routes/log.booking.attempt.routes.js';
 import paymentRecord from './routes/payment.record.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import whiteLabel from './routes/white.label.routes.js';
 import { generateVoucher } from './voucher/generateVoucher.js'
+import fileUpload from "express-fileupload";
 import path from "path";
 
 
@@ -26,6 +28,9 @@ app.use(morgan('dev'));
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
+app.use(fileUpload({
+  createParentPath: true
+}));
 
 app.get('/', (req, res) => {
   res.send('API is running ');
@@ -39,6 +44,8 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/verify', amountverification)
 app.use('/api/attempt', logBookingAttempt)
 app.use('/api/record-payment', paymentRecord)
+
+app.use('/api/white-label', whiteLabel)
 
 app.use('/api/admin/', adminRoutes)
 

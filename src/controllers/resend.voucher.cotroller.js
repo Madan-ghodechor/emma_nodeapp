@@ -1,12 +1,10 @@
-
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
-import PaymentRecords from '../models/Payment.model.js';
 import { addUsersService } from '../services/bulk.add.users.js';
 import BookingLogs from '../models/Log.Booking.model.js';
 import { sendMail } from "../services/mailer.service.js";
 
 
-export const recordController = async (req, res) => {
+export const sendVouchers = async (req, res) => {
     try {
         const razorpay_order_id = req.body.razorpay_order_id;
         const razorpay_payment_id = req.body.razorpay_payment_id;
@@ -14,49 +12,11 @@ export const recordController = async (req, res) => {
         const bulkRefId = req.body.bulkRefId;
         const userData = req.body.userData;
         const amount = req.body.amount;
-        const whiteLabel = req.body.whiteLabel._id
         const stage = 5;
 
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !bulkRefId || !userData || !amount) {
             return sendError(res, 'Invalid payload', 400);
         }
-
-        const log = await PaymentRecords.create({
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature,
-            paymentAmount: amount,
-            assetId: whiteLabel
-        });
-        const storedData = {
-            ...log._doc
-        }
-
-
-        const generateBookingId = async () => {
-            const prefix = "SF26";
-            const width = 5;
-
-            const lastRecord = await BookingLogs
-                .findOne({ bulkRefId: { $regex: `^${prefix}` } })
-                .sort({ bulkRefId: -1 })
-                .select("bulkRefId");
-
-            let nextNumber = 1;
-
-            if (lastRecord && lastRecord.bulkRefId) {
-                const lastNumber = parseInt(lastRecord.bulkRefId.replace(prefix, ""));
-                nextNumber = lastNumber + 1;
-            }
-
-            return prefix + String(nextNumber).padStart(width, "0");
-        };
-
-
-        let refferenceID = bulkRefId;
-        // if (!!bulkRefId) {
-        //     refferenceID = await generateBookingId()
-        // }
 
 
         const registerPrimaryData = await addUsersService(userData, log, refferenceID);

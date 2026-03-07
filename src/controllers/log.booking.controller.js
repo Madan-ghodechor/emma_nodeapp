@@ -14,6 +14,7 @@ export const createBookingLog = async (req, res) => {
         const singleRoom = req.body.singleroom;
         const doubleRoom = req.body.doubleroom;
         const tripleRoom = req.body.tripleroom;
+        const whiteLabel = req.body.whiteLabel;
 
         if (!Array.isArray(userData) || req.body.length === 0) {
             return sendError(res, 'Invalid payload', 400);
@@ -41,8 +42,6 @@ export const createBookingLog = async (req, res) => {
 
         const bulkRefId = refferenceID || await generateBookingId();
 
-
-
         const log = await BookingLogs.findOneAndUpdate(
             { bulkRefId },
             {
@@ -52,7 +51,8 @@ export const createBookingLog = async (req, res) => {
                     stage,
                     singleroom: singleRoom,
                     doubleroom: doubleRoom,
-                    tripleroom: tripleRoom
+                    tripleroom: tripleRoom,
+                    whiteLabel
                 },
             },
             {

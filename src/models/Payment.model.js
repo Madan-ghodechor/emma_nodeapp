@@ -17,6 +17,10 @@ const PaymentRecords = new mongoose.Schema(
         paymentAmount: {
             type: Number,
             required: true
+        },
+        assetId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'white-lable-companies'
         }
 
     },
