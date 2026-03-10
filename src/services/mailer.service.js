@@ -25,6 +25,7 @@ export const sendMail = async (emails, usersData, amount, status) => {
         day: "2-digit",
         month: "long",
         year: "numeric",
+        timeZone: "UTC"
       });
     };
 
@@ -62,9 +63,9 @@ export const sendMail = async (emails, usersData, amount, status) => {
       })
     } else {
 
-      const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData, whiteLabel)
+      const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData, whiteLabel, usersData.userData[0].createdAt)
       
-      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
+      // sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
 
       hasAttachment = [
         {
@@ -237,7 +238,7 @@ ${roomsHtml}
 `;
 }
 
-async function getData(bulkRefId, userData, whiteLabel) {
+async function getData(bulkRefId, userData, whiteLabel,createdAt) {
 
   let primaryAttendeeName;
   let primaryAttendeeEmail;
@@ -265,15 +266,7 @@ async function getData(bulkRefId, userData, whiteLabel) {
 
     return `${day} ${month} ${year}`;
   }
-  const getTodayDDMonYYYY = () => {
-    const d = new Date();
 
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = d.toLocaleString('en-IN', { month: 'short' });
-    const year = d.getFullYear();
-
-    return `${day} ${month} ${year}`;
-  }
 
   let roomtype = userData[0]?.roomtype;
   let checkIn = formatToDDMMYY(userData[0]?.checkIn);
@@ -281,7 +274,7 @@ async function getData(bulkRefId, userData, whiteLabel) {
 
   let payload = {
     "bookingId": bulkRefId,
-    "createdAt": getTodayDDMonYYYY(),
+    "createdAt":formatToDDMMYY(createdAt),
     "primaryAttendeeName": primaryAttendeeName,
     "primaryAttendeeEmail": primaryAttendeeEmail,
     "rooms": [

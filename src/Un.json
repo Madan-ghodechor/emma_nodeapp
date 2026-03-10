@@ -1,0 +1,46 @@
+{
+    "success": true,
+    "message": "Dashbord fetch successful",
+    "data": {
+        "rooms": [
+            {
+                "_id": "69aeb61a6c241fba69f1a6fb",
+                "roomId": "single-1",
+                "roomType": "single",
+                "checkIn": "2026-03-23T00:00:00.000Z",
+                "checkOut": "2026-03-24T00:00:00.000Z",
+                "attendees": [
+                    {
+                        "_id": "69aeb61a6c241fba69f1a6f9",
+                        "firstName": "Abhishek ",
+                        "lastName": "korpad",
+                        "email": "abhishek@1234",
+                        "phone": "+917474483834",
+                        "gst": "",
+                        "is_primary_user": true,
+                        "primary_user_email": "abhishek@1234",
+                        "company": {
+                            "_id": "69aeb61a6c241fba69f1a6f6",
+                            "name": "TATA",
+                            "gst": ""
+                        },
+                        "bulkRefId": "SF2600001",
+                        "createdAt": "2026-03-09T11:59:22.787Z",
+                        "updatedAt": "2026-03-09T11:59:22.787Z",
+                        "__v": 0
+                    }
+                ],
+                "bulkRefId": "SF2600001",
+                "payment": {
+                    "_id": "69aeb61a6c241fba69f1a6f3",
+                    "razorpay_payment_id": "pay_SP7RYveGn1b5ZG",
+                    "paymentAmount": 9500
+                },
+                "paymentId": "69aeb61a6c241fba69f1a6f3",
+                "createdAt": "2026-03-09T11:59:22.796Z"
+            }
+        ],
+        "user_count": 1,
+        "totelAmount": 9500
+    }
+}

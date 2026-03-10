@@ -17,7 +17,7 @@ import whiteLabel from './routes/white.label.routes.js';
 import { generateVoucher } from './voucher/generateVoucher.js'
 import fileUpload from "express-fileupload";
 import path from "path";
-
+import voucherRoutes from './routes/voucher.routes.js';
 
 const app = express();
 
@@ -48,6 +48,8 @@ app.use('/api/record-payment', paymentRecord)
 app.use('/api/white-label', whiteLabel)
 
 app.use('/api/admin/', adminRoutes)
+
+app.use('/api/resendvoucher', voucherRoutes);
 
 app.post('/api/voucher', async (req, res) => {
   const buffer = await generateVoucher(req.body);

@@ -230,7 +230,7 @@ const getTotalAmount = async () => {
 };
 const getPaymentRecords = async () => {
     try {
-        const payments = await PaymentRecords.find().select('_id razorpay_payment_id paymentAmount');
+        const payments = await PaymentRecords.find().select('_id  razorpay_order_id razorpay_payment_id paymentAmount');
 
         return payments;
 
