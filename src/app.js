@@ -49,7 +49,7 @@ app.use('/api/white-label', whiteLabel)
 
 app.use('/api/admin/', adminRoutes)
 
-app.use('/api/resendvoucher', voucherRoutes);
+
 
 app.post('/api/voucher', async (req, res) => {
   const buffer = await generateVoucher(req.body);
