@@ -17,7 +17,7 @@ import whiteLabel from './routes/white.label.routes.js';
 import { generateVoucher } from './voucher/generateVoucher.js'
 import fileUpload from "express-fileupload";
 import path from "path";
-import voucherRoutes from './routes/voucher.routes.js';
+
 
 const app = express();
 
