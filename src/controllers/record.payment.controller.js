@@ -53,10 +53,6 @@ export const recordController = async (req, res) => {
 
 
         let refferenceID = bulkRefId;
-        // if (!!bulkRefId) {
-        //     refferenceID = await generateBookingId()
-        // }
-
 
         const registerPrimaryData = await addUsersService(userData, log, refferenceID);
         await updatePaymentByBulkRefId(bulkRefId, log, amount, stage);
@@ -64,7 +60,7 @@ export const recordController = async (req, res) => {
 
         const mails = await findPrimaryUser(userData);
 
-        sendMail(mails, req.body, amount, 'success');
+        sendMail(mails, req.body, amount, 'success', registerPrimaryData?.bookings[0]?.createdAt);
 
 
         return sendSuccess(res, 'Data stored successfully', {

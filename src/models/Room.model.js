@@ -19,6 +19,14 @@ const roomSchema = new mongoose.Schema({
   paymentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PaymentRecords'
+  },
+  paymentIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PaymentRecords'
+  }],
+  passcode: {
+    type: String,
+    trim: true
   }
 
 }, { timestamps: true });

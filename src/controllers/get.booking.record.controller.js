@@ -19,7 +19,13 @@ export const getRecordController = async (req, res) => {
         const rooms = await Room.find({ bulkRefId: refID }).lean();
 
         const attendeeIds = rooms.flatMap(r => r.attendees);
-        const paymentIds = rooms.map(r => r.paymentId);
+        const paymentIds = rooms.flatMap(room => {
+            if (Array.isArray(room.paymentIds) && room.paymentIds.length > 0) {
+                return room.paymentIds;
+            }
+
+            return room.paymentId ? [room.paymentId] : [];
+        });
 
         const [users, payments] = await Promise.all([
             User.find({ _id: { $in: attendeeIds } }).lean(),
@@ -30,8 +36,17 @@ export const getRecordController = async (req, res) => {
         const paymentMap = new Map(payments.map(p => [p._id.toString(), p]));
 
         const userData = rooms.map(room => {
-            const payment = paymentMap.get(room.paymentId?.toString());
- 
+            const roomPaymentIds = Array.isArray(room.paymentIds) && room.paymentIds.length > 0
+                ? room.paymentIds
+                : (room.paymentId ? [room.paymentId] : []);
+
+            const roomPayments = roomPaymentIds
+                .map(id => paymentMap.get(id?.toString()))
+                .filter(Boolean);
+
+            const collectedAmount = roomPayments.reduce((sum, payment) => {
+                return sum + (payment.paymentAmount || 0);
+            }, 0);
 
             return {
                 roomId: room.roomId,
@@ -39,7 +54,9 @@ export const getRecordController = async (req, res) => {
                 checkIn: room.checkIn.toISOString().split('T')[0],
                 checkOut: room.checkOut.toISOString().split('T')[0],
 
-                payment: payment ? payment : '',
+                payment: roomPayments[roomPayments.length - 1] || '',
+                payments: roomPayments,
+                collectedAmount,
 
                 attendees: room.attendees.map(id => {
                     const u = userMap.get(id.toString());

@@ -77,7 +77,9 @@ export const addUsersService = async (data, payment = null, bulkRefIds = null) =
                 attendees: attendeeIds,
                 bulkRefId,
                 payment: hasPayment ? 1 : 0,
-                paymentId: hasPayment ? payment._id : null
+                paymentId: hasPayment ? payment._id : null,
+                paymentIds: hasPayment ? [payment._id] : [],
+                passcode: room.passcode || null
             });
 
             createdRooms.push(newRoom);

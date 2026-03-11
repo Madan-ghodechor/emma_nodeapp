@@ -8,6 +8,7 @@ import Room from '../models/Room.model.js';
 import User from '../models/User.model.js';
 import PaymentRecords from '../models/Payment.model.js';
 import Company from '../models/Company.model.js';
+import { createRemainingPaymentToken, sendRemainingPaymentMail } from "../services/mailer.service.js";
 
 
 
@@ -139,13 +140,23 @@ export const getDashboard = async (req, res) => {
         const AllUsers = await getUsersInternal();
 
         const roomsData = rawrooms.map(room => {
-            const paymentsData = payments.find(payment =>
-                String(payment._id) === String(room.paymentId)
+            const roomPaymentIds = Array.isArray(room.paymentIds) && room.paymentIds.length > 0
+                ? room.paymentIds
+                : (room.paymentId ? [room.paymentId] : []);
+
+            const paymentsData = payments.filter(payment =>
+                roomPaymentIds.some(id => String(id) === String(payment._id))
             );
+
+            const totalPaidAmount = paymentsData.reduce((sum, payment) => {
+                return sum + (payment.paymentAmount || 0);
+            }, 0);
 
             return {
                 ...room?._doc,
-                payment: paymentsData || null
+                payment: paymentsData[paymentsData.length - 1] || null,
+                payments: paymentsData,
+                totalPaidAmount
             };
         });
 
@@ -282,5 +293,76 @@ export const getPaymentByID = async (req, res) => {
     } catch (error) {
         console.error(error);
         return sendError(res, 'Failed to fetch payment', 500, error.message);
+    }
+};
+
+export const sendRemainingPaymentCollectionMail = async (req, res) => {
+    try {
+        const { data } = req.body;
+
+        if (!data?.booking || !data?.extension || !data?.pricing) {
+            return sendError(res, 'Invalid payload', 400);
+        }
+
+        const { booking, extension, pricing } = data;
+        const attendees = Array.isArray(booking.attendees) ? booking.attendees : [];
+        const primaryUser = attendees.find((attendee) => attendee?.is_primary_user) || attendees[0];
+        const secondaryUsers = attendees
+            .filter((attendee) => attendee?.email && attendee.email !== primaryUser?.email)
+            .map((attendee) => attendee.email);
+
+        if (!primaryUser?.email) {
+            return sendError(res, 'Primary user email not found', 400);
+        }
+
+        if (!pricing.extraPayableAmount || pricing.extraPayableAmount <= 0) {
+            return sendError(res, 'Remaining amount must be greater than zero', 400);
+        }
+
+        const paymentContext = {
+            bookingId: booking._id,
+            bulkRefId: booking.bulkRefId,
+            roomId: booking.roomId,
+            roomType: booking.roomType,
+            paymentId: booking.paymentId || booking.payment?._id || null,
+            paymentIds: booking.paymentIds || [],
+            extension,
+            pricing,
+            attendees: attendees.map((attendee) => ({
+                id: attendee._id,
+                firstName: attendee.firstName,
+                lastName: attendee.lastName,
+                email: attendee.email,
+                phone: attendee.phone,
+                is_primary_user: attendee.is_primary_user,
+                primary_user_email: attendee.primary_user_email,
+                company: attendee.company || null
+            })),
+            attendee: {
+                id: primaryUser._id,
+                firstName: primaryUser.firstName,
+                lastName: primaryUser.lastName,
+                email: primaryUser.email,
+                phone: primaryUser.phone
+            }
+        };
+
+        const token = createRemainingPaymentToken(paymentContext);
+        const paymentPageUrl = `${process.env.UPGRADEURL || ''}${token}`;
+        sendRemainingPaymentMail({
+            paymentPageUrl,
+            data
+        });
+
+        return sendSuccess(res, 'Remaining payment email sent successfully', {
+            sentTo: primaryUser.email,
+            cc: secondaryUsers,
+            bulkRefId: booking.bulkRefId,
+            extraPayableAmount: pricing.extraPayableAmount,
+            paymentPageUrl
+        });
+    } catch (error) {
+        console.log(error)
+        return sendError(res, error.message);
     }
 };
