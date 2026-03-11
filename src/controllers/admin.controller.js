@@ -8,7 +8,7 @@ import Room from '../models/Room.model.js';
 import User from '../models/User.model.js';
 import PaymentRecords from '../models/Payment.model.js';
 import Company from '../models/Company.model.js';
-import { createRemainingPaymentToken, sendRemainingPaymentMail } from "../services/mailer.service.js";
+import { createRemainingPaymentToken, sendMail, sendRemainingPaymentMail } from "../services/mailer.service.js";
 
 
 
@@ -238,9 +238,10 @@ const getTotalAmount = async () => {
         return null;
     }
 };
+
 const getPaymentRecords = async () => {
     try {
-        const payments = await PaymentRecords.find().select('_id razorpay_payment_id paymentAmount');
+        const payments = await PaymentRecords.find().select('_id razorpay_payment_id razorpay_order_id paymentAmount');
 
         return payments;
 
@@ -366,3 +367,87 @@ export const sendRemainingPaymentCollectionMail = async (req, res) => {
         return sendError(res, error.message);
     }
 };
+
+export const sendVoucher = async (req, res) => {
+    try {
+        const booking = req.body?.data || req.body;
+
+        if (!booking?.bulkRefId || !booking?.roomId || !Array.isArray(booking?.attendees) || booking.attendees.length === 0) {
+            return sendError(res, 'Invalid payload', 400);
+        }
+
+        const primaryUser = booking.primaryAttendee
+            || booking.attendees.find((attendee) => attendee?.is_primary_user)
+            || booking.attendees[0];
+
+        if (!primaryUser?.email) {
+            return sendError(res, 'Primary user email not found', 400);
+        }
+
+        const secondaryUsers = booking.attendees
+            .filter((attendee) => attendee?.email && attendee.email !== primaryUser.email)
+            .map((attendee) => attendee.email);
+
+        const mailUsers = {
+            primaryUser: primaryUser.email,
+            secondaryUsers,
+            guestName: primaryUser.firstName,
+            primaryUserWhatsapp: primaryUser.phone
+        };
+
+        const userData = [
+            {
+                roomId: booking.roomId,
+                roomtype: booking.roomType,
+                checkIn: booking.checkIn,
+                checkOut: booking.checkOut,
+                attendees: booking.attendees.map((attendee) => ({
+                    id: attendee._id,
+                    firstName: attendee.firstName,
+                    lastName: attendee.lastName,
+                    email: attendee.email,
+                    organisation: attendee.company?.name || attendee.organisation || '',
+                    phone: attendee.phone,
+                    gst: attendee.gst,
+                    is_primary_user: attendee.is_primary_user,
+                    primary_user_email: attendee.primary_user_email
+                }))
+            }
+        ];
+
+        const mailPayload = {
+            bulkRefId: booking.bulkRefId,
+            userData,
+            razorpay_payment_id: booking.payment?.razorpay_payment_id || '',
+            razorpay_order_id: booking.payment?.razorpay_order_id || '',
+            logId: booking.paymentId || booking.payment?._id || ''
+        };
+
+        sendMail(
+            mailUsers,
+            mailPayload,
+            booking.payment?.paymentAmount || 0,
+            'success',
+            booking.createdAt || new Date()
+        );
+
+        const updatedRoom = await Room.findOneAndUpdate(
+            booking._id
+                ? { _id: booking._id }
+                : { bulkRefId: booking.bulkRefId, roomId: booking.roomId },
+            { $inc: { voucherSend: 1 } },
+            { new: true, projection: { voucherSend: 1 } }
+        );
+
+        return sendSuccess(res, 'Voucher email sent successfully', {
+            sentTo: primaryUser.email,
+            cc: secondaryUsers,
+            bulkRefId: booking.bulkRefId,
+            paymentId: booking.paymentId || booking.payment?._id || null,
+            voucherSend: updatedRoom?.voucherSend ?? null
+        });
+    } catch (error) {
+        console.log(error)
+        return sendError(res, error.message);
+    }
+}
