@@ -55,11 +55,11 @@ export let generateVoucher = async (req) => {
     html = html.replace('{{primaryAttendeeEmail}}', data.primaryAttendeeEmail);
 
     if (data.rooms[0].type == 'Triple' || data.rooms[0].type == 'triple') {
-        html = html.replace('ConditionalfooterHeight', '457px');  // Triple Sharing
+        html = html.replace('ConditionalfooterHeight', '523px');  // Triple Sharing
     } else if (data.rooms[0].type == 'Double' || data.rooms[0].type == 'double') {
-        html = html.replace('ConditionalfooterHeight', '562px');  // Double Sharing
+        html = html.replace('ConditionalfooterHeight', '628px');  // Double Sharing
     } else {
-        html = html.replace('ConditionalfooterHeight', '639px');  // Single Sharing
+        html = html.replace('ConditionalfooterHeight', '705px');  // Single Sharing
     }
 
 
