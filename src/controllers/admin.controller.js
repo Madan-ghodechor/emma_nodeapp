@@ -325,6 +325,8 @@ export const sendRemainingPaymentCollectionMail = async (req, res) => {
             bulkRefId: booking.bulkRefId,
             roomId: booking.roomId,
             roomType: booking.roomType,
+            currentCheckIn : booking.checkIn,
+            currentCheckOut : booking.checkOut,
             paymentId: booking.paymentId || booking.payment?._id || null,
             paymentIds: booking.paymentIds || [],
             extension,

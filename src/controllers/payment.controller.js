@@ -2,6 +2,8 @@
 import razorpay from '../config/razorpay.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 
+
+//********* Create Oder ID *********//
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { amount, currency = 'INR', receipt } = req.body;
@@ -10,12 +12,11 @@ export const createRazorpayOrder = async (req, res) => {
       return sendError(res, 'Amount is required', 400);
     }
 
-    // Razorpay expects amount in paise
     const options = {
-      amount: amount * 100, // ₹100 => 10000 paise
+      amount: amount * 100,
       currency,
       receipt: receipt || `rcpt_${Date.now()}`,
-      payment_capture: 1 // auto capture
+      payment_capture: 1
     };
 
     const order = await razorpay.orders.create(options);

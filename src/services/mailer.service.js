@@ -60,9 +60,8 @@ export const sendMail = async (emails, usersData, amount, status, CDate) => {
       })
     } else {
 
-      console.log(CDate)
       const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData, CDate)
-      // sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
+      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
 
       hasAttachment = [
         {
@@ -126,7 +125,7 @@ export const sendRemainingPaymentMail = async (payload) => {
       html: mailData.html
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    const info = transporter.sendMail(mailOptions);
     console.log("Remaining payment mail sent:", info.messageId);
     return info;
   } catch (error) {
@@ -610,10 +609,10 @@ export function remainingPaymentTemplate(data) {
       : 'Stay extension + room upgrade';
 
   const ctaLabel = isStayExtend
-    ? 'Pay for Extension'
+    ? 'Upgrade'
     : isRoomUpgrade
-      ? 'Pay for Upgrade'
-      : 'Pay Now';
+      ? 'Upgrade'
+      : 'Upgrade';
 
   return `
 <!DOCTYPE html>

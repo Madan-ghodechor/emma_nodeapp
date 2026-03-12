@@ -35,7 +35,7 @@ const roomSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-roomSchema.pre('save', function (next) {
+roomSchema.pre('save', function () {
   if (this.paymentId) {
     const paymentId = this.paymentId.toString();
     const paymentIds = Array.isArray(this.paymentIds)
@@ -46,8 +46,6 @@ roomSchema.pre('save', function (next) {
       this.paymentIds = [...(this.paymentIds || []), this.paymentId];
     }
   }
-
-  next();
 });
 
 const syncPaymentIdsOnUpdate = function () {
