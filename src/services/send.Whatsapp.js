@@ -12,7 +12,7 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
         let documentLink = null;
 
         if (pdfBuffer) {
-            const uploadDir = path.join(process.cwd(), "uploads");
+            const uploadDir = path.join(process.cwd(), "src", "uploads");
 
             if (!fs.existsSync(uploadDir)) {
                 fs.mkdirSync(uploadDir, { recursive: true });

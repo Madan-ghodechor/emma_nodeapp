@@ -24,7 +24,7 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "src", "uploads")));
 
 
 app.get('/', (req, res) => {
