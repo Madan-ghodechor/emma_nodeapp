@@ -31,6 +31,9 @@ const roomSchema = new mongoose.Schema({
   passcode: {
     type: String,
     trim: true
+  },
+  isDeactive: {
+    type: String
   }
 
 }, { timestamps: true });

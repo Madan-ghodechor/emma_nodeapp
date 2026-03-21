@@ -133,13 +133,16 @@ export const login = async (req, res) => {
 export const getDashboard = async (req, res) => {
     try {
 
-        const totelAmount = await getTotalAmount();
         const payments = await getPaymentRecords();
         const rawrooms = await getRooms();
         const companies = await getCompanies();
         const AllUsers = await getUsersInternal();
 
-        const roomsData = rawrooms.map(room => {
+        const roomsData = rawrooms.filter(room => {
+            if (room?.isDeactive == 'false' || room?.isDeactive == undefined) {
+                return room
+            }
+        }).map(room => {
             const roomPaymentIds = Array.isArray(room.paymentIds) && room.paymentIds.length > 0
                 ? room.paymentIds
                 : (room.paymentId ? [room.paymentId] : []);
@@ -171,6 +174,7 @@ export const getDashboard = async (req, res) => {
             };
         });
 
+        let UsersCount = 0;
         const rooms = roomsData.map(room => {
             const attendees = room.attendees.map(id =>
                 users.find(user =>
@@ -178,16 +182,25 @@ export const getDashboard = async (req, res) => {
                 )
             ).filter(Boolean);
 
+            const uniqueCount = new Set(
+                (room.attendees || []).map(id => String(id))
+            ).size;
+
+            UsersCount += uniqueCount;
+
             return {
                 ...room,
                 attendees
             };
         });
 
+        const totelAmount = rooms.reduce((sum, room) => {
+            return sum + (room?.totalPaidAmount || 0);
+        }, 0);
 
         return sendSuccess(res, 'Dashbord fetch successful', {
             rooms,
-            user_count: users.length,
+            user_count: UsersCount,
             totelAmount
         });
 
@@ -325,8 +338,8 @@ export const sendRemainingPaymentCollectionMail = async (req, res) => {
             bulkRefId: booking.bulkRefId,
             roomId: booking.roomId,
             roomType: booking.roomType,
-            currentCheckIn : booking.checkIn,
-            currentCheckOut : booking.checkOut,
+            currentCheckIn: booking.checkIn,
+            currentCheckOut: booking.checkOut,
             paymentId: booking.paymentId || booking.payment?._id || null,
             paymentIds: booking.paymentIds || [],
             extension,
