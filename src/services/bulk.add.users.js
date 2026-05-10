@@ -44,6 +44,7 @@ export const addUsersService = async (data, payment = null, bulkRefIds = null) =
                         firstName: attendee.firstName,
                         lastName: attendee.lastName,
                         email: attendee.email,
+                        orderId: attendee.orderId,
                         phone: attendee.phone,
                         gst: attendee.gst,
                         is_primary_user: attendee.is_primary_user,
@@ -59,6 +60,11 @@ export const addUsersService = async (data, payment = null, bulkRefIds = null) =
                     ) {
                         user.is_primary_user = true;
                         user.primary_user_email = attendee.primary_user_email;
+                        await user.save();
+                    }
+
+                    if (attendee.orderId && user.orderId !== attendee.orderId) {
+                        user.orderId = attendee.orderId;
                         await user.save();
                     }
                 }

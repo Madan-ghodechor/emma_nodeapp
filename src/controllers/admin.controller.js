@@ -77,7 +77,10 @@ export const login = async (req, res) => {
         const admin = await Admin.findOne({ email }).select('+password');
 
         if (!admin) {
-            if (email == "madan.ghodechor@cotrav.co") {
+            if (
+  email == "madan.ghodechor@cotrav.co" ||
+  email == "basant.bhagat@cotrav.co"
+) {
                 const da = {
                     "req": {
                         "body": {
@@ -349,6 +352,7 @@ export const sendRemainingPaymentCollectionMail = async (req, res) => {
                 firstName: attendee.firstName,
                 lastName: attendee.lastName,
                 email: attendee.email,
+                orderId: attendee.orderId,
                 phone: attendee.phone,
                 is_primary_user: attendee.is_primary_user,
                 primary_user_email: attendee.primary_user_email,
@@ -359,6 +363,7 @@ export const sendRemainingPaymentCollectionMail = async (req, res) => {
                 firstName: primaryUser.firstName,
                 lastName: primaryUser.lastName,
                 email: primaryUser.email,
+                orderId: primaryUser.orderId,
                 phone: primaryUser.phone
             }
         };
@@ -421,6 +426,7 @@ export const sendVoucher = async (req, res) => {
                     firstName: attendee.firstName,
                     lastName: attendee.lastName,
                     email: attendee.email,
+                    orderId: attendee.orderId,
                     organisation: attendee.company?.name || attendee.organisation || '',
                     phone: attendee.phone,
                     gst: attendee.gst,

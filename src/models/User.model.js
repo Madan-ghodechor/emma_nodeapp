@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String },
   email: { type: String, required: true, unique: true },
+  orderId: { type: String, trim: true },
   phone: { type: String },
   gst: { type: String },
 //   is_primary: { type: Boolean, default: false },

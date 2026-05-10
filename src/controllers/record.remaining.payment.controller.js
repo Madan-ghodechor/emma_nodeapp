@@ -38,6 +38,7 @@ const findOrCreateAttendee = async (guest, bulkRefId) => {
       firstName: guest.firstName,
       lastName: guest.lastName,
       email: guest.email,
+      orderId: guest.orderId,
       phone: guest.phone,
       gst: guest.gst || '',
       is_primary_user: !!guest.is_primary_user,
@@ -45,6 +46,9 @@ const findOrCreateAttendee = async (guest, bulkRefId) => {
       company: companyId,
       bulkRefId
     });
+  } else if (guest.orderId && user.orderId !== guest.orderId) {
+    user.orderId = guest.orderId;
+    await user.save();
   }
 
   return user._id;
@@ -113,6 +117,7 @@ const buildUserDataForMail = (reqBody, tokenData, nextRoomType, nextCheckIn, nex
         firstName: guest.firstName,
         lastName: guest.lastName,
         email: guest.email,
+        orderId: guest.orderId,
         organisation: guest.organisation || '',
         phone: guest.phone,
         gst: guest.gst || '',

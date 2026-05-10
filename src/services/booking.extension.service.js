@@ -210,6 +210,7 @@ export const previewExtensionRequest = async (payload) => {
       firstName: primaryGuest.firstName,
       lastName: primaryGuest.lastName,
       email: primaryGuest.email,
+      orderId: primaryGuest.orderId,
       phone: primaryGuest.phone
     }
   };
@@ -229,6 +230,7 @@ export const previewExtensionRequest = async (payload) => {
       firstName: attendee.firstName,
       lastName: attendee.lastName,
       email: attendee.email,
+      orderId: attendee.orderId,
       phone: attendee.phone,
       is_primary_user: attendee.is_primary_user,
       primary_user_email: attendee.primary_user_email

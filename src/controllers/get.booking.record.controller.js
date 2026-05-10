@@ -67,6 +67,7 @@ export const getRecordController = async (req, res) => {
                         firstName: u.firstName,
                         lastName: u.lastName,
                         email: u.email,
+                        orderId: u.orderId,
                         organisation: u.organisation,
                         phone: u.phone,
                         gst: u.gst,

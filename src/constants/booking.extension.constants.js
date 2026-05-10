@@ -1,6 +1,6 @@
 export const ROOM_PRICES = Object.freeze({
   single: 9500,
-  double: 10000,
+  double: 11500,
   triple: 12750
 });
 
@@ -17,8 +17,8 @@ export const ROOM_UPGRADE_RULES = Object.freeze({
 });
 
 export const EXTENSION_DATE_LIMITS = Object.freeze({
-  minCheckIn: '2026-03-23',
-  maxCheckIn: '2026-03-26',
-  minCheckOut: '2026-03-24',
-  maxCheckOut: '2026-03-27'
+  minCheckIn: '2026-06-09',
+  maxCheckIn: '2026-06-10',
+  minCheckOut: '2026-06-10',
+  maxCheckOut: '2026-06-11'
 });

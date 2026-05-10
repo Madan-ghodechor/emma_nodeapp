@@ -352,6 +352,7 @@ async function getData(bulkRefId, userData, Cdate) {
     return {
       "name": guest?.firstName + ' ' + guest.lastName,
       "email": guest?.email,
+      "orderId": guest?.orderId,
       "phone": guest?.phone,
     }
   })
