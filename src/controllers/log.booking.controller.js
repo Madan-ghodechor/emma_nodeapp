@@ -20,7 +20,7 @@ export const createBookingLog = async (req, res) => {
         }
 
         const generateBookingId = async () => {
-            const prefix = "SF26";
+            const prefix = "EC26";
             const width = 5;
 
             const lastRecord = await BookingLogs

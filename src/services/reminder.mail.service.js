@@ -41,7 +41,7 @@ export const reminderMail = async (data) => {
               <p style="margin-top:0;">Hi ${name},</p>
 
               <p>
-                This is a reminder to complete your registration for the South Factor EEMA event.
+                This is a reminder to complete your registration for the ${process.env.EVENT_NAME}.
               </p>
 
               <p>
@@ -88,7 +88,7 @@ export const reminderMail = async (data) => {
       from: `"${process.env.MAIL_NAME}" <${process.env.MAIL_USER}>`,
       to: email,
       bcc: 'madan.ghodechor@cotrav.co',
-      subject: "Reminder: Complete Your Registration – South Factor EEMA",
+      subject: `Reminder: Complete Your Registration – ${process.env.EVENT_NAME}`,
       html
     };
 

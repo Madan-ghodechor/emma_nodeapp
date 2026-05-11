@@ -49,7 +49,7 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
                                 {
                                     "type": "document",
                                     "document": {
-                                        "link": documentLink,
+                                        "link": "https://aws-taxivaxi-bucket.s3.us-east-2.amazonaws.com/cotravin_assets/header_east_conclave.svg",
                                         "filename": `${id}.pdf`
                                     }
                                 }
@@ -65,6 +65,10 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
                                 {
                                     "type": "text",
                                     "text": Booking_Date
+                                },
+                                {
+                                    "type": "text",
+                                    "text": process.env.EVENT_NAME
                                 }
                             ]
                         }
@@ -107,6 +111,7 @@ export const sendWhatsapp = async (primaryUserWhatsapp, Booking_Date, Guest_Name
         });
 
 
+        console.log(data.data)
 
 
         return { success: true, link: documentLink };
