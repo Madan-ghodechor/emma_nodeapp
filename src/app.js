@@ -13,6 +13,7 @@ import amountverification from './routes/amount.verification.routes.js';
 import logBookingAttempt from './routes/log.booking.attempt.routes.js';
 import paymentRecord from './routes/payment.record.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import emmaRegistrationRoutes from './routes/emma.registration.routes.js';
 import { generateVoucher } from './voucher/generateVoucher.js'
 import path from "path";
 
@@ -39,6 +40,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/verify', amountverification)
 app.use('/api/attempt', logBookingAttempt)
 app.use('/api/record-payment', paymentRecord)
+app.use('/api/emma-registration', emmaRegistrationRoutes)
 
 app.use('/api/admin/', adminRoutes)
 
