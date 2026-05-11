@@ -1,5 +1,6 @@
 import EmmaRegistration from '../models/EmmaRegistration.model.js';
 import EmmaRegistrationPayment from '../models/EmmaRegistrationPayment.model.js';
+import { sendEmmaRegistrationSuccessMail } from '../services/mailer.service.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 
 const normalizePhone = (phone = '') => String(phone).replace(/\s+/g, '').trim();
@@ -257,6 +258,12 @@ export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
     registration.paymentId = payment._id;
     registration.paymentStatus = 'paid';
     await registration.save();
+
+    try {
+      await sendEmmaRegistrationSuccessMail(registration, payment);
+    } catch (mailError) {
+      console.error('EMMA registration confirmation mail failed:', mailError);
+    }
 
     return sendSuccess(res, 'EMMA registration payment recorded successfully', {
       paymentId: payment._id,

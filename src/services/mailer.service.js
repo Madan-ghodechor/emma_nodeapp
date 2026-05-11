@@ -134,6 +134,36 @@ export const sendRemainingPaymentMail = async (payload) => {
   }
 };
 
+export const sendEmmaRegistrationSuccessMail = async (registration, payment) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: `"${process.env.MAIL_NAME}" <${process.env.MAIL_USER}>`,
+      to: registration.email,
+      bcc: process.env.EMMA_REGISTRATION_BCC || 'madan.ghodechor@cotrav.co',
+      subject: `EMMA Registration Successful - ${registration.orderId}`,
+      html: emmaRegistrationSuccessTemplate({
+        registration,
+        payment
+      })
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("EMMA registration mail sent:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("EMMA registration mail error:", error);
+    throw error;
+  }
+};
+
 function buildRemainingPaymentMailData(payload) {
   if (payload?.data?.booking && payload?.data?.extension && payload?.data?.pricing) {
     return buildRemainingPaymentMailDataFromRawPayload(payload);
@@ -666,6 +696,110 @@ export function remainingPaymentTemplate(data) {
   </p>
 
   <p style="margin-bottom:0;">Use the link above to continue the payment flow. It carries the reference data required for the frontend to proceed with this balance payment.</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>
+`;
+}
+
+export function emmaRegistrationSuccessTemplate(data) {
+  const { registration, payment } = data;
+  const fullName = [registration.firstName, registration.lastName].filter(Boolean).join(' ');
+  const memberType = registration.memberType === 'non' ? 'Non-EMMA Member' : 'EMMA Member';
+  const formatAmount = (value) => Number(value || 0).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  const formatDate = (value) => new Date(value || Date.now()).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>EMMA Registration Successful</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" style="padding:24px;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr>
+<td style="background:#245f73;color:#ffffff;padding:20px;">
+  <h2 style="margin:0;font-size:20px;">EMMA Registration Successful</h2>
+  <p style="margin:6px 0 0;font-size:14px;">Your registration payment has been received.</p>
+</td>
+</tr>
+<tr>
+<td style="padding:24px;font-size:14px;color:#333;line-height:22px;">
+  <p style="margin-top:0;">Hi ${fullName || 'Guest'},</p>
+  <p>Your EMMA registration has been confirmed successfully. Please keep the registration ID below for future reference.</p>
+
+  <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #e0e0e0;border-radius:6px;margin:16px 0;">
+    <tr>
+      <td style="color:#555;">Registration ID</td>
+      <td style="text-align:right;font-weight:bold;">${registration.orderId}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Name</td>
+      <td style="text-align:right;">${fullName}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Email</td>
+      <td style="text-align:right;">${registration.email}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Phone</td>
+      <td style="text-align:right;">${registration.phone}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Company</td>
+      <td style="text-align:right;">${registration.company}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Member Type</td>
+      <td style="text-align:right;">${memberType}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Registration Date</td>
+      <td style="text-align:right;">${formatDate(registration.createdAt)}</td>
+    </tr>
+  </table>
+
+  <h3 style="margin:20px 0 10px;font-size:16px;">Payment Details</h3>
+  <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #e0e0e0;border-radius:6px;">
+    <tr>
+      <td style="color:#555;">Base Fee</td>
+      <td style="text-align:right;">INR ${formatAmount(payment.baseFee)}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">GST Amount</td>
+      <td style="text-align:right;">INR ${formatAmount(payment.gstAmount)}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;font-weight:bold;">Total Paid</td>
+      <td style="text-align:right;font-weight:bold;">INR ${formatAmount(payment.paymentAmount || payment.totalAmount)}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Razorpay Payment ID</td>
+      <td style="text-align:right;">${payment.razorpay_payment_id}</td>
+    </tr>
+    <tr>
+      <td style="color:#555;">Razorpay Order ID</td>
+      <td style="text-align:right;">${payment.razorpay_order_id}</td>
+    </tr>
+  </table>
+
+  <p style="margin-bottom:0;">Thank you for registering.</p>
 </td>
 </tr>
 </table>
