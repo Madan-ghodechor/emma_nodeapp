@@ -14,6 +14,7 @@ export const createBookingLog = async (req, res) => {
         const singleRoom = req.body.singleroom;
         const doubleRoom = req.body.doubleroom;
         const tripleRoom = req.body.tripleroom;
+        const eemareg = req.body.eemareg
 
         if (!Array.isArray(userData) || req.body.length === 0) {
             return sendError(res, 'Invalid payload', 400);
@@ -52,7 +53,8 @@ export const createBookingLog = async (req, res) => {
                     stage,
                     singleroom: singleRoom,
                     doubleroom: doubleRoom,
-                    tripleroom: tripleRoom
+                    tripleroom: tripleRoom,
+                    eemareg
                 },
             },
             {

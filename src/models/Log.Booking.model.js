@@ -51,6 +51,10 @@ const BookingLogs = new mongoose.Schema(
         payload: {
             type: mongoose.Schema.Types.Mixed,
             required: true
+        },
+        eemareg: {
+            type: mongoose.Schema.Types.Mixed,
+            required: true
         }
     },
     {
