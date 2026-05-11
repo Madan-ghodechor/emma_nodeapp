@@ -61,7 +61,7 @@ export const sendMail = async (emails, usersData, amount, status, CDate) => {
     } else {
 
       const pdfBuffer = await getData(usersData.bulkRefId, usersData.userData, CDate)
-      // sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
+      sendWhatsapp(emails.primaryUserWhatsapp, formatDate(), emails.guestName, pdfBuffer, 'success', usersData.bulkRefId)
 
       hasAttachment = [
         {
