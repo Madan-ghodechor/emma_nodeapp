@@ -17,6 +17,10 @@ const PaymentRecords = new mongoose.Schema(
         paymentAmount: {
             type: Number,
             required: true
+        },
+        emmaOrderId: {
+            type: String,
+            default: null
         }
 
     },

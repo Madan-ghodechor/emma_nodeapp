@@ -26,6 +26,10 @@ const emmaRegistrationSchema = new mongoose.Schema(
     paymentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'EmmaRegistrationPayment'
+    },
+    registerFrom:{
+      type: Number,
+      default: 0
     }
   },
   { timestamps: true }

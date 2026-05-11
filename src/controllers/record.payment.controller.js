@@ -4,6 +4,8 @@ import PaymentRecords from '../models/Payment.model.js';
 import { addUsersService } from '../services/bulk.add.users.js';
 import BookingLogs from '../models/Log.Booking.model.js';
 import { sendMail } from "../services/mailer.service.js";
+import EmmaRegistration from '../models/EmmaRegistration.model.js';
+import EmmaRegistrationPayment from '../models/EmmaRegistrationPayment.model.js';
 
 
 export const recordController = async (req, res) => {
@@ -27,6 +29,13 @@ export const recordController = async (req, res) => {
             paymentAmount: amount
 
         });
+
+        // Logic to insert data into emmaregistrations
+        const emmaOrderId = await getBookingLog(bulkRefId, log)
+        if (emmaOrderId) {
+            await PaymentRecords.findByIdAndUpdate(log._id, { emmaOrderId })
+        }
+
         const storedData = {
             ...log._doc
         }
@@ -116,4 +125,70 @@ const findPrimaryUser = async (userdata) => {
         guestName,
         primaryUserWhatsapp
     }
+}
+
+const getBookingLog = async (bulkRefId, paymentLog) => {
+    const bookingLog = await BookingLogs.findOne({ bulkRefId });
+    if (!bookingLog?.eemareg?.isEmma) return;
+
+    const { payload: registrationData, fee: baseFee, gstAmount, totalAmount } = bookingLog.eemareg;
+
+    const existingPayment = await EmmaRegistrationPayment.findOne({
+        razorpay_payment_id: paymentLog.razorpay_payment_id
+    });
+    if (existingPayment) return existingPayment.orderId;
+
+    const normalizedEmail = registrationData.email?.toLowerCase().trim();
+    const normalizedPhone = String(registrationData.phone).trim();
+
+    const existingReg = await EmmaRegistration.findOne({
+        $or: [{ email: normalizedEmail }, { phone: normalizedPhone }]
+    });
+    if (existingReg) return existingReg.orderId;
+
+    const prefix = 'EMMA26';
+    const lastRegistration = await EmmaRegistration
+        .findOne({ orderId: { $regex: `^${prefix}` } })
+        .sort({ orderId: -1 })
+        .select('orderId');
+
+    let nextNumber = 1;
+    if (lastRegistration?.orderId) {
+        const lastNumber = Number.parseInt(lastRegistration.orderId.replace(prefix, ''), 10);
+        nextNumber = Number.isNaN(lastNumber) ? 1 : lastNumber + 1;
+    }
+    const orderId = prefix + String(nextNumber).padStart(5, '0');
+
+    const registration = await EmmaRegistration.create({
+        memberType: registrationData.memberType || 'emma',
+        firstName: registrationData.firstName,
+        lastName: registrationData.lastName,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        company: registrationData.company,
+        gst: registrationData.gst,
+        fee: baseFee,
+        gstAmount,
+        totalAmount,
+        orderId,
+        registerFrom: 1
+    });
+
+    const payment = await EmmaRegistrationPayment.create({
+        registrationId: registration._id,
+        orderId: registration.orderId,
+        razorpay_order_id: paymentLog.razorpay_order_id,
+        razorpay_payment_id: paymentLog.razorpay_payment_id,
+        razorpay_signature: paymentLog.razorpay_signature,
+        baseFee,
+        gstAmount,
+        totalAmount,
+        paymentAmount: totalAmount
+    });
+
+    registration.paymentId = payment._id;
+    registration.paymentStatus = 'paid';
+    await registration.save();
+
+    return registration.orderId;
 }
