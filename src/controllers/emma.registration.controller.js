@@ -28,60 +28,130 @@ const generateOrderId = async () => {
   return prefix + String(nextNumber).padStart(width, '0');
 };
 
-export const createEmmaRegistration = async (req, res) => {
-  try {
-    const {
-      memberType = 'emma',
-      firstName,
-      lastName,
-      email,
-      phone,
-      company,
-      gst,
-      fee,
-      gstAmount,
-      totalAmount
-    } = req.body;
+const getRegistrationPayload = (body = {}) => {
+  const {
+    memberType = 'emma',
+    firstName,
+    lastName,
+    email,
+    phone,
+    company,
+    gst,
+    fee,
+    gstAmount,
+    totalAmount
+  } = body;
 
-    if (!firstName || !lastName || !email || !phone || !company || !fee) {
-      return sendError(res, 'Missing required registration details', 400);
-    }
+  return {
+    memberType,
+    firstName,
+    lastName,
+    email,
+    phone,
+    company,
+    gst,
+    fee,
+    gstAmount,
+    totalAmount
+  };
+};
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const rawPhone = String(phone).trim();
-    const normalizedPhone = normalizePhone(phone);
-    const existingRegistration = await EmmaRegistration.findOne({
-      $or: [
-        { email: normalizedEmail },
-        { phone: rawPhone },
-        { phone: normalizedPhone },
-        { phone: phoneSpacingRegex(normalizedPhone) }
-      ]
-    });
+const validateRegistrationPayload = async (payload) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    company,
+    fee
+  } = payload;
 
-    if (existingRegistration) {
-      const field = existingRegistration.email === normalizedEmail ? 'email' : 'phone number';
+  if (!firstName || !lastName || !email || !phone || !company || !fee) {
+    return {
+      valid: false,
+      statusCode: 400,
+      message: 'Missing required registration details'
+    };
+  }
 
-      return sendError(res, `Registration already exists with this ${field}`, 409, {
+  const normalizedEmail = email.toLowerCase().trim();
+  const rawPhone = String(phone).trim();
+  const normalizedPhone = normalizePhone(phone);
+  const existingRegistration = await EmmaRegistration.findOne({
+    $or: [
+      { email: normalizedEmail },
+      { phone: rawPhone },
+      { phone: normalizedPhone },
+      { phone: phoneSpacingRegex(normalizedPhone) }
+    ]
+  });
+
+  if (existingRegistration) {
+    const field = existingRegistration.email === normalizedEmail ? 'email' : 'phone number';
+
+    return {
+      valid: false,
+      statusCode: 409,
+      message: `Registration already exists with this ${field}`,
+      data: {
         id: existingRegistration._id,
         orderId: existingRegistration.orderId,
         registration: existingRegistration
-      });
-    }
+      }
+    };
+  }
 
-    const registration = await EmmaRegistration.create({
-      memberType,
-      firstName,
-      lastName,
+  return {
+    valid: true,
+    normalized: {
+      ...payload,
       email: normalizedEmail,
       phone: normalizedPhone,
-      company,
-      gst,
-      fee,
-      gstAmount: gstAmount ?? Math.round(Number(fee) * 0.18),
-      totalAmount: totalAmount ?? Math.round(Number(fee) * 1.18),
-      orderId: await generateOrderId()
-    });
+      gstAmount: payload.gstAmount ?? Math.round(Number(fee) * 0.18),
+      totalAmount: payload.totalAmount ?? Math.round(Number(fee) * 1.18)
+    }
+  };
+};
+
+const createRegistrationRecord = async (payload) => {
+  return EmmaRegistration.create({
+    memberType: payload.memberType,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    email: payload.email,
+    phone: payload.phone,
+    company: payload.company,
+    gst: payload.gst,
+    fee: payload.fee,
+    gstAmount: payload.gstAmount,
+    totalAmount: payload.totalAmount,
+    orderId: await generateOrderId()
+  });
+};
+
+export const validateEmmaRegistration = async (req, res) => {
+  try {
+    const validation = await validateRegistrationPayload(getRegistrationPayload(req.body));
+
+    if (!validation.valid) {
+      return sendError(res, validation.message, validation.statusCode, validation.data || null);
+    }
+
+    return sendSuccess(res, 'Registration details are valid');
+  } catch (error) {
+    return sendError(res, error.message, 500);
+  }
+};
+
+export const createEmmaRegistration = async (req, res) => {
+  try {
+    const validation = await validateRegistrationPayload(getRegistrationPayload(req.body));
+
+    if (!validation.valid) {
+      return sendError(res, validation.message, validation.statusCode, validation.data || null);
+    }
+
+    const registration = await createRegistrationRecord(validation.normalized);
 
     return sendSuccess(res, 'Registration created successfully', {
       id: registration._id,
@@ -128,8 +198,7 @@ export const getEmmaRegistration = async (req, res) => {
 export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
   try {
     const {
-      registrationId,
-      orderId,
+      registrationData,
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
@@ -140,8 +209,7 @@ export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
     } = req.body;
 
     if (
-      !registrationId ||
-      !orderId ||
+      !registrationData ||
       !razorpay_order_id ||
       !razorpay_payment_id ||
       !razorpay_signature ||
@@ -152,36 +220,31 @@ export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
       return sendError(res, 'Invalid payment payload', 400);
     }
 
-    const registration = await EmmaRegistration.findOne({
-      _id: registrationId,
-      orderId: String(orderId).trim()
+    const validation = await validateRegistrationPayload({
+      ...getRegistrationPayload(registrationData),
+      fee: baseFee,
+      gstAmount,
+      totalAmount
     });
 
-    if (!registration) {
-      return sendError(res, 'Registration not found', 404);
+    if (!validation.valid) {
+      return sendError(res, validation.message, validation.statusCode, validation.data || null);
     }
 
     const existingPayment = await EmmaRegistrationPayment.findOne({ razorpay_payment_id });
-
     if (existingPayment) {
-      if (!registration.paymentId || String(registration.paymentId) !== String(existingPayment._id)) {
-        registration.paymentId = existingPayment._id;
-        registration.paymentStatus = 'paid';
-        await registration.save();
-      }
-
       return sendSuccess(res, 'Payment already recorded', {
         paymentId: existingPayment._id,
-        payment: existingPayment,
-        registration
+        payment: existingPayment
       });
     }
 
+    const registration = await createRegistrationRecord(validation.normalized);
     const paymentAmount = amount ?? totalAmount;
 
     const payment = await EmmaRegistrationPayment.create({
-      registrationId,
-      orderId: String(orderId).trim(),
+      registrationId: registration._id,
+      orderId: registration.orderId,
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
