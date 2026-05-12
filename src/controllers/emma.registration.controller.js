@@ -11,7 +11,7 @@ const phoneSpacingRegex = (phone = '') => {
 };
 
 const generateOrderId = async () => {
-  const prefix = 'EMMA26';
+  const prefix = 'EEMA26';
   const width = 5;
 
   const lastRegistration = await EmmaRegistration
@@ -31,7 +31,7 @@ const generateOrderId = async () => {
 
 const getRegistrationPayload = (body = {}) => {
   const {
-    memberType = 'emma',
+    memberType = 'eema',
     firstName,
     lastName,
     email,
@@ -262,10 +262,10 @@ export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
     try {
       await sendEmmaRegistrationSuccessMail(registration, payment);
     } catch (mailError) {
-      console.error('EMMA registration confirmation mail failed:', mailError);
+      console.error('EEMA registration confirmation mail failed:', mailError);
     }
 
-    return sendSuccess(res, 'EMMA registration payment recorded successfully', {
+    return sendSuccess(res, 'EEMA registration payment recorded successfully', {
       paymentId: payment._id,
       payment,
       registration

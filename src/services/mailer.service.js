@@ -148,7 +148,7 @@ export const sendEmmaRegistrationSuccessMail = async (registration, payment) => 
       from: `"${process.env.MAIL_NAME}" <${process.env.MAIL_USER}>`,
       to: registration.email,
       bcc: process.env.EMMA_REGISTRATION_BCC || 'madan.ghodechor@cotrav.co',
-      subject: `EMMA Registration Successful - ${registration.orderId}`,
+      subject: `EEMA Registration Successful - ${registration.orderId}`,
       html: emmaRegistrationSuccessTemplate({
         registration,
         payment
@@ -156,10 +156,10 @@ export const sendEmmaRegistrationSuccessMail = async (registration, payment) => 
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("EMMA registration mail sent:", info.messageId);
+    console.log("EEMA registration mail sent:", info.messageId);
     return info;
   } catch (error) {
-    console.error("EMMA registration mail error:", error);
+    console.error("EEMA registration mail error:", error);
     throw error;
   }
 };
@@ -710,7 +710,7 @@ export function remainingPaymentTemplate(data) {
 export function emmaRegistrationSuccessTemplate(data) {
   const { registration, payment } = data;
   const fullName = [registration.firstName, registration.lastName].filter(Boolean).join(' ');
-  const memberType = registration.memberType === 'non' ? 'Non-EMMA Member' : 'EMMA Member';
+  const memberType = registration.memberType === 'non' ? 'Non-EEMA Member' : 'EEMA Member';
   const formatAmount = (value) => Number(value || 0).toLocaleString('en-IN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -726,7 +726,7 @@ export function emmaRegistrationSuccessTemplate(data) {
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>EMMA Registration Successful</title>
+  <title>EEMA Registration Successful</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0">
@@ -735,14 +735,14 @@ export function emmaRegistrationSuccessTemplate(data) {
 <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
 <tr>
 <td style="background:#245f73;color:#ffffff;padding:20px;">
-  <h2 style="margin:0;font-size:20px;">EMMA Registration Successful</h2>
+  <h2 style="margin:0;font-size:20px;">EEMA Registration Successful</h2>
   <p style="margin:6px 0 0;font-size:14px;">Your registration payment has been received.</p>
 </td>
 </tr>
 <tr>
 <td style="padding:24px;font-size:14px;color:#333;line-height:22px;">
   <p style="margin-top:0;">Hi ${fullName || 'Guest'},</p>
-  <p>Your EMMA registration has been confirmed successfully. Please keep the registration ID below for future reference.</p>
+  <p>Your EEMA registration has been confirmed successfully. Please keep the registration ID below for future reference.</p>
 
   <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #e0e0e0;border-radius:6px;margin:16px 0;">
     <tr>

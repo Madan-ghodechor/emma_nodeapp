@@ -146,7 +146,7 @@ const getBookingLog = async (bulkRefId, paymentLog) => {
     });
     if (existingReg) return existingReg.orderId;
 
-    const prefix = 'EMMA26';
+    const prefix = 'EEMA26';
     const lastRegistration = await EmmaRegistration
         .findOne({ orderId: { $regex: `^${prefix}` } })
         .sort({ orderId: -1 })
@@ -160,7 +160,7 @@ const getBookingLog = async (bulkRefId, paymentLog) => {
     const orderId = prefix + String(nextNumber).padStart(5, '0');
 
     const registration = await EmmaRegistration.create({
-        memberType: registrationData.memberType || 'emma',
+        memberType: registrationData.memberType || 'eema',
         firstName: registrationData.firstName,
         lastName: registrationData.lastName,
         email: normalizedEmail,

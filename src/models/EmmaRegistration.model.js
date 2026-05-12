@@ -4,9 +4,9 @@ const emmaRegistrationSchema = new mongoose.Schema(
   {
     memberType: {
       type: String,
-      enum: ['emma', 'non'],
+      enum: ['eema', 'non'],
       required: true,
-      default: 'emma'
+      default: 'eema'
     },
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
