@@ -148,7 +148,7 @@ export const sendEmmaRegistrationSuccessMail = async (registration, payment) => 
       from: `"${process.env.MAIL_NAME}" <${process.env.MAIL_USER}>`,
       to: registration.email,
       bcc: process.env.EMMA_REGISTRATION_BCC || 'madan.ghodechor@cotrav.co',
-      subject: `EEMA Registration Successful - ${registration.orderId}`,
+      subject: `You are now registered: East Conclave 2026`,
       html: emmaRegistrationSuccessTemplate({
         registration,
         payment
@@ -726,86 +726,117 @@ export function emmaRegistrationSuccessTemplate(data) {
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>EEMA Registration Successful</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EEMA – East Conclave 2026</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td align="center" style="padding:24px;">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
-<tr>
-<td style="background:#245f73;color:#ffffff;padding:20px;">
-  <h2 style="margin:0;font-size:20px;">EEMA Registration Successful</h2>
-  <p style="margin:6px 0 0;font-size:14px;">Your registration payment has been received.</p>
-</td>
-</tr>
-<tr>
-<td style="padding:24px;font-size:14px;color:#333;line-height:22px;">
-  <p style="margin-top:0;">Hi ${fullName || 'Guest'},</p>
-  <p>Your EEMA registration has been confirmed successfully. Please keep the registration ID below for future reference.</p>
+<body style="margin:0;padding:0;background:#f0f3f5;font-family:Georgia,'Times New Roman',serif;">
 
-  <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #e0e0e0;border-radius:6px;margin:16px 0;">
-    <tr>
-      <td style="color:#555;">Registration ID</td>
-      <td style="text-align:right;font-weight:bold;">${registration.orderId}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Name</td>
-      <td style="text-align:right;">${fullName}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Email</td>
-      <td style="text-align:right;">${registration.email}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Phone</td>
-      <td style="text-align:right;">${registration.phone}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Company</td>
-      <td style="text-align:right;">${registration.company}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Member Type</td>
-      <td style="text-align:right;">${memberType}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Registration Date</td>
-      <td style="text-align:right;">${formatDate(registration.createdAt)}</td>
-    </tr>
-  </table>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f3f5;">
+  <tr>
+    <td align="center" style="padding:36px 16px;">
 
-  <h3 style="margin:20px 0 10px;font-size:16px;">Payment Details</h3>
-  <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #e0e0e0;border-radius:6px;">
-    <tr>
-      <td style="color:#555;">Base Fee</td>
-      <td style="text-align:right;">INR ${formatAmount(payment.baseFee)}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">GST Amount</td>
-      <td style="text-align:right;">INR ${formatAmount(payment.gstAmount)}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;font-weight:bold;">Total Paid</td>
-      <td style="text-align:right;font-weight:bold;">INR ${formatAmount(payment.paymentAmount || payment.totalAmount)}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Razorpay Payment ID</td>
-      <td style="text-align:right;">${payment.razorpay_payment_id}</td>
-    </tr>
-    <tr>
-      <td style="color:#555;">Razorpay Order ID</td>
-      <td style="text-align:right;">${payment.razorpay_order_id}</td>
-    </tr>
-  </table>
+      <!-- Card -->
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
 
-  <p style="margin-bottom:0;">Thank you for registering.</p>
-</td>
-</tr>
+        <!-- Header Banner -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#1a4a5c 0%,#245f73 55%,#2e7d96 100%);padding:0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:32px 32px 0 32px;">
+
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:0 32px 8px 32px;">
+                  <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;color:#ffffff;line-height:1.25;letter-spacing:0.5px;">East Conclave 2026</h1>
+                </td>
+              </tr>
+              <!-- Gold accent rule -->
+              <tr>
+                <td style="padding:12px 32px 0 32px;">
+                  <table cellpadding="0" cellspacing="0"><tr>
+                    <td style="width:48px;height:2px;background:#c9a84c;"></td>
+                    <td style="width:8px;height:2px;background:rgba(201,168,76,0.35);"></td>
+                    <td style="width:4px;height:2px;background:rgba(201,168,76,0.15);"></td>
+                  </tr></table>
+                </td>
+              </tr>
+              <!-- Date strip -->
+              <tr>
+                <td style="padding:14px 32px 28px 32px;">
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;padding:6px 14px;">
+                        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;color:rgba(255,255,255,0.85);text-transform:uppercase;">9 &amp; 10 June 2026</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:36px 32px 12px 32px;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#2c2c2c;line-height:26px;">
+
+            <p style="margin:0 0 20px 0;">Dear <strong style="color:#1a4a5c;">${fullName}</strong>,</p>
+
+            <p style="margin:0 0 20px 0;">Thank you for registering for the <strong>East Conclave 2026</strong>.</p>
+
+            <p style="margin:0 0 20px 0;">We're delighted to have you join us on the <strong>9th and 10th of June 2026</strong> for what promises to be an inspiring and engaging experience with the finest minds and voices from the industry.</p>
+
+            <!-- Pull-quote block -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0;">
+              <tr>
+                <td style="border-left:3px solid #c9a84c;padding:12px 20px;background:#fdfaf4;">
+                  <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:15px;font-style:italic;color:#4a3a1a;line-height:26px;">From insightful conversations to meaningful connections, the Conclave is designed to bring together ideas, perspectives, and people who are shaping the future of our ecosystem.</p>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0 0 36px 0;">We look forward to welcoming you and sharing this experience together.</p>
+
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:1px;background:#e8e8e8;"></td></tr></table>
+          </td>
+        </tr>
+
+        <!-- Sign-off -->
+        <tr>
+          <td style="padding:24px 32px 32px 32px;">
+            <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#888;letter-spacing:0.3px;">Warm regards,</p>
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:700;color:#1a4a5c;letter-spacing:0.5px;">Team EEMA</p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#1a4a5c;padding:16px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:0.5px;">© 2026 EEMA · Event &amp; Entertainment Management Association of India</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+      <!-- /Card -->
+
+    </td>
+  </tr>
 </table>
-</td>
-</tr>
-</table>
+
 </body>
 </html>
 `;

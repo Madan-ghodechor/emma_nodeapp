@@ -17,9 +17,13 @@ const companySchema = new mongoose.Schema(
     //   required: true
     },
     bulkRefId: {
-  type: String,
-  index: true
-}
+      type: String,
+      index: true
+    },
+    isEEMAMember: {
+      type: Number,
+      default: 0
+    }
 
   },
   

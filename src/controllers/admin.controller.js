@@ -9,6 +9,7 @@ import User from '../models/User.model.js';
 import PaymentRecords from '../models/Payment.model.js';
 import Company from '../models/Company.model.js';
 import { createRemainingPaymentToken, sendMail, sendRemainingPaymentMail } from "../services/mailer.service.js";
+import xlsx from 'xlsx';
 
 
 
@@ -78,9 +79,9 @@ export const login = async (req, res) => {
 
         if (!admin) {
             if (
-  email == "madan.ghodechor@cotrav.co" ||
-  email == "basant.bhagat@cotrav.co"
-) {
+                email == "madan.ghodechor@cotrav.co" ||
+                email == "basant.bhagat@cotrav.co"
+            ) {
                 const da = {
                     "req": {
                         "body": {
@@ -469,6 +470,61 @@ export const sendVoucher = async (req, res) => {
         });
     } catch (error) {
         console.log(error)
+        return sendError(res, error.message);
+    }
+}
+
+export const bulkCompaniesAdd = async (req, res) => {
+    try {
+        if (!req.file) {
+            return sendError(res, 'Excel file is required', 400);
+        }
+
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+
+        // data starts at row 3, column C — no headers, only company names
+        const range = xlsx.utils.decode_range(sheet['!ref']);
+        range.s.r = 2; // 3rd row (0-indexed)
+        range.s.c = 2; // column C (0-indexed)
+        range.e.c = 2; // only column C
+        sheet['!ref'] = xlsx.utils.encode_range(range);
+
+        // header:1 returns raw arrays since there are no header rows
+        const rows = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+        if (!rows.length) {
+            return sendError(res, 'Excel file is empty', 400);
+        }
+
+        const companies = rows
+            .map(row => String(row[0] ?? '').trim())
+            .filter(name => name !== '')
+            .map(name => ({ name }));
+
+        if (!companies.length) {
+            return sendError(res, 'No company names found in column C from row 3', 400);
+        }
+
+        const ops = companies.map(company => ({
+            updateOne: {
+                filter: { name: company.name },
+                update: { $set: { ...company, isEEMAMember: 1 } },
+                upsert: true
+            }
+        }));
+
+        const result = await Company.bulkWrite(ops, { ordered: false });
+
+        return sendSuccess(res, 'Companies processed successfully', {
+            total: companies.length,
+            inserted: result.upsertedCount,
+            updated: result.modifiedCount
+        });
+
+    } catch (error) {
+        console.log(error);
         return sendError(res, error.message);
     }
 }
