@@ -1,7 +1,9 @@
 import EmmaRegistration from '../models/EmmaRegistration.model.js';
 import EmmaRegistrationPayment from '../models/EmmaRegistrationPayment.model.js';
+import Company from '../models/Company.model.js';
 import { sendEmmaRegistrationSuccessMail } from '../services/mailer.service.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
+import { generateEastConclaveId } from '../utils/referenceId.js';
 
 const normalizePhone = (phone = '') => String(phone).replace(/\s+/g, '').trim();
 const escapeRegex = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -10,26 +12,7 @@ const phoneSpacingRegex = (phone = '') => {
   return new RegExp(`^${normalizedPhone.split('').map(escapeRegex).join('\\s*')}$`);
 };
 
-const generateOrderId = async () => {
-  const prefix = 'EEMA26';
-  const width = 5;
-
-  const lastRegistration = await EmmaRegistration
-    .findOne({ orderId: { $regex: `^${prefix}` } })
-    .sort({ orderId: -1 })
-    .select('orderId');
-
-  let nextNumber = 1;
-
-  if (lastRegistration?.orderId) {
-    const lastNumber = Number.parseInt(lastRegistration.orderId.replace(prefix, ''), 10);
-    nextNumber = Number.isNaN(lastNumber) ? 1 : lastNumber + 1;
-  }
-
-  return prefix + String(nextNumber).padStart(width, '0');
-};
-
-const getRegistrationPayload = (body = {}) => {
+export const getRegistrationPayload = (body = {}) => {
   const {
     memberType = 'eema',
     firstName,
@@ -57,7 +40,7 @@ const getRegistrationPayload = (body = {}) => {
   };
 };
 
-const validateRegistrationPayload = async (payload) => {
+export const validateRegistrationPayload = async (payload) => {
   const {
     firstName,
     lastName,
@@ -114,7 +97,9 @@ const validateRegistrationPayload = async (payload) => {
   };
 };
 
-const createRegistrationRecord = async (payload) => {
+export const createRegistrationRecord = async (payload, options = {}) => {
+  const orderId = options.orderId || await generateEastConclaveId();
+
   return EmmaRegistration.create({
     memberType: payload.memberType,
     firstName: payload.firstName,
@@ -126,8 +111,32 @@ const createRegistrationRecord = async (payload) => {
     fee: payload.fee,
     gstAmount: payload.gstAmount,
     totalAmount: payload.totalAmount,
-    orderId: await generateOrderId()
+    orderId,
+    registerFrom: options.registerFrom ?? payload.registerFrom
   });
+};
+
+export const addRegistrationCompany = async (registration) => {
+  const companyName = registration?.company?.trim();
+  if (!companyName) return null;
+
+  return Company.findOneAndUpdate(
+    { name: companyName },
+    {
+      $set: {
+        name: companyName,
+        gst: registration.gst,
+        bulkRefId: registration.orderId
+      },
+      $setOnInsert: {
+        isEEMAMember: 0
+      }
+    },
+    {
+      new: true,
+      upsert: true
+    }
+  );
 };
 
 export const validateEmmaRegistration = async (req, res) => {
@@ -258,6 +267,7 @@ export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
     registration.paymentId = payment._id;
     registration.paymentStatus = 'paid';
     await registration.save();
+    await addRegistrationCompany(registration);
 
     try {
       await sendEmmaRegistrationSuccessMail(registration, payment);

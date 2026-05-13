@@ -3,9 +3,15 @@ import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import PaymentRecords from '../models/Payment.model.js';
 import { addUsersService } from '../services/bulk.add.users.js';
 import BookingLogs from '../models/Log.Booking.model.js';
-import { sendMail } from "../services/mailer.service.js";
+import { sendEmmaRegistrationSuccessMail, sendMail } from "../services/mailer.service.js";
 import EmmaRegistration from '../models/EmmaRegistration.model.js';
 import EmmaRegistrationPayment from '../models/EmmaRegistrationPayment.model.js';
+import {
+    addRegistrationCompany,
+    createRegistrationRecord,
+    getRegistrationPayload,
+    validateRegistrationPayload
+} from './emma.registration.controller.js';
 
 
 export const recordController = async (req, res) => {
@@ -30,8 +36,7 @@ export const recordController = async (req, res) => {
 
         });
 
-        // Logic to insert data into emmaregistrations
-        const emmaOrderId = await getBookingLog(bulkRefId, log)
+        const emmaOrderId = await registerEemaFromBookingLog(bulkRefId, log)
         if (emmaOrderId) {
             await PaymentRecords.findByIdAndUpdate(log._id, { emmaOrderId })
         }
@@ -39,26 +44,6 @@ export const recordController = async (req, res) => {
         const storedData = {
             ...log._doc
         }
-
-
-        const generateBookingId = async () => {
-            const prefix = "EC26";
-            const width = 5;
-
-            const lastRecord = await BookingLogs
-                .findOne({ bulkRefId: { $regex: `^${prefix}` } })
-                .sort({ bulkRefId: -1 })
-                .select("bulkRefId");
-
-            let nextNumber = 1;
-
-            if (lastRecord && lastRecord.bulkRefId) {
-                const lastNumber = parseInt(lastRecord.bulkRefId.replace(prefix, ""));
-                nextNumber = lastNumber + 1;
-            }
-
-            return prefix + String(nextNumber).padStart(width, "0");
-        };
 
 
         let refferenceID = bulkRefId;
@@ -127,52 +112,77 @@ const findPrimaryUser = async (userdata) => {
     }
 }
 
-const getBookingLog = async (bulkRefId, paymentLog) => {
-    const bookingLog = await BookingLogs.findOne({ bulkRefId });
-    if (!bookingLog?.eemareg?.isEmma) return;
+const shouldRegisterEemaFromLog = (eemareg) => {
+    return Boolean(
+        eemareg?.isEmma === true ||
+        eemareg?.isEmma === 1 ||
+        eemareg?.isEmma === 'true' ||
+        eemareg?.payload ||
+        eemareg?.registrationData ||
+        eemareg?.data ||
+        (eemareg?.firstName && eemareg?.email && eemareg?.phone)
+    );
+};
 
-    const { payload: registrationData, fee: baseFee, gstAmount, totalAmount } = bookingLog.eemareg;
+const getEemaRegistrationPaymentData = (eemareg = {}) => {
+    const registrationData = eemareg.payload || eemareg.registrationData || eemareg.data || eemareg;
+    const baseFee = eemareg.fee ?? eemareg.baseFee ?? registrationData.fee ?? registrationData.baseFee;
+    const gstAmount = eemareg.gstAmount ?? registrationData.gstAmount;
+    const totalAmount = eemareg.totalAmount ?? registrationData.totalAmount;
+
+    return {
+        registrationData,
+        baseFee,
+        gstAmount,
+        totalAmount
+    };
+};
+
+const registerEemaFromBookingLog = async (bulkRefId, paymentLog) => {
+    const bookingLog = await BookingLogs.findOne({ bulkRefId });
+    if (!bookingLog?.eemareg || !shouldRegisterEemaFromLog(bookingLog.eemareg)) return;
+
+    const {
+        registrationData,
+        baseFee,
+        gstAmount,
+        totalAmount
+    } = getEemaRegistrationPaymentData(bookingLog.eemareg);
+
+    if (!registrationData || !baseFee || gstAmount === undefined || !totalAmount) {
+        throw new Error('Invalid EEMA registration data in booking log');
+    }
 
     const existingPayment = await EmmaRegistrationPayment.findOne({
         razorpay_payment_id: paymentLog.razorpay_payment_id
     });
     if (existingPayment) return existingPayment.orderId;
 
-    const normalizedEmail = registrationData.email?.toLowerCase().trim();
-    const normalizedPhone = String(registrationData.phone).trim();
+    let registration = await EmmaRegistration.findOne({ orderId: bulkRefId });
 
-    const existingReg = await EmmaRegistration.findOne({
-        $or: [{ email: normalizedEmail }, { phone: normalizedPhone }]
-    });
-    if (existingReg) return existingReg.orderId;
+    if (!registration) {
+        const validation = await validateRegistrationPayload({
+            ...getRegistrationPayload(registrationData),
+            fee: baseFee,
+            gstAmount,
+            totalAmount
+        });
 
-    const prefix = 'EEMA26';
-    const lastRegistration = await EmmaRegistration
-        .findOne({ orderId: { $regex: `^${prefix}` } })
-        .sort({ orderId: -1 })
-        .select('orderId');
+        if (!validation.valid) {
+            throw new Error(validation.message);
+        }
 
-    let nextNumber = 1;
-    if (lastRegistration?.orderId) {
-        const lastNumber = Number.parseInt(lastRegistration.orderId.replace(prefix, ''), 10);
-        nextNumber = Number.isNaN(lastNumber) ? 1 : lastNumber + 1;
+        registration = await createRegistrationRecord(validation.normalized, {
+            orderId: bulkRefId,
+            registerFrom: 1
+        });
     }
-    const orderId = prefix + String(nextNumber).padStart(5, '0');
 
-    const registration = await EmmaRegistration.create({
-        memberType: registrationData.memberType || 'eema',
-        firstName: registrationData.firstName,
-        lastName: registrationData.lastName,
-        email: normalizedEmail,
-        phone: normalizedPhone,
-        company: registrationData.company,
-        gst: registrationData.gst,
-        fee: baseFee,
-        gstAmount,
-        totalAmount,
-        orderId,
-        registerFrom: 1
+    const existingRegistrationPayment = await EmmaRegistrationPayment.findOne({
+        registrationId: registration._id,
+        orderId: registration.orderId
     });
+    if (existingRegistrationPayment) return existingRegistrationPayment.orderId;
 
     const payment = await EmmaRegistrationPayment.create({
         registrationId: registration._id,
@@ -189,6 +199,13 @@ const getBookingLog = async (bulkRefId, paymentLog) => {
     registration.paymentId = payment._id;
     registration.paymentStatus = 'paid';
     await registration.save();
+    await addRegistrationCompany(registration);
+
+    try {
+        await sendEmmaRegistrationSuccessMail(registration, payment);
+    } catch (mailError) {
+        console.error('EEMA registration confirmation mail failed:', mailError);
+    }
 
     return registration.orderId;
 }

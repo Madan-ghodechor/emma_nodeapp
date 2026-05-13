@@ -1,8 +1,7 @@
 
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import BookingLogs from '../models/Log.Booking.model.js';
-
-import crypto from 'crypto';
+import { generateEastConclaveId } from '../utils/referenceId.js';
 
 
 export const createBookingLog = async (req, res) => {
@@ -20,27 +19,7 @@ export const createBookingLog = async (req, res) => {
             return sendError(res, 'Invalid payload', 400);
         }
 
-        const generateBookingId = async () => {
-            const prefix = "EC26";
-            const width = 5;
-
-            const lastRecord = await BookingLogs
-                .findOne({ bulkRefId: { $regex: `^${prefix}` } })
-                .sort({ bulkRefId: -1 })  // safe because padded
-                .select("bulkRefId");
-
-            let nextNumber = 1;
-
-            if (lastRecord && lastRecord.bulkRefId) {
-                const lastNumber = parseInt(lastRecord.bulkRefId.replace(prefix, ""));
-                nextNumber = lastNumber + 1;
-            }
-
-            return prefix + String(nextNumber).padStart(width, "0");
-        };
-
-
-        const bulkRefId = refferenceID || await generateBookingId();
+        const bulkRefId = refferenceID || await generateEastConclaveId();
 
 
 
