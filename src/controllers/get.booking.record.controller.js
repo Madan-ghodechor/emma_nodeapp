@@ -3,6 +3,8 @@ import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import BookingLogs from '../models/Log.Booking.model.js';
 import Company from '../models/Company.model.js';
 import PaymentRecords from '../models/Payment.model.js';
+import EmmaRegistration from '../models/EmmaRegistration.model.js';
+import EmmaRegistrationPayment from '../models/EmmaRegistrationPayment.model.js';
 import User from '../models/User.model.js';
 import Room from '../models/Room.model.js';
 
@@ -27,9 +29,11 @@ export const getRecordController = async (req, res) => {
             return room.paymentId ? [room.paymentId] : [];
         });
 
-        const [users, payments] = await Promise.all([
+        const [users, payments, registration, registrationPayment] = await Promise.all([
             User.find({ _id: { $in: attendeeIds } }).lean(),
-            PaymentRecords.find({ _id: { $in: paymentIds } }).lean()
+            PaymentRecords.find({ _id: { $in: paymentIds } }).lean(),
+            EmmaRegistration.findOne({ orderId: refID }).lean(),
+            EmmaRegistrationPayment.findOne({ orderId: refID }).lean()
         ]);
 
         const userMap = new Map(users.map(u => [u._id.toString(), u]));
@@ -81,7 +85,17 @@ export const getRecordController = async (req, res) => {
 
 
         return sendSuccess(res, 'Data stored successfully', {
-            userData
+            userData,
+            registrationFees: registration
+                ? {
+                    baseFee: registrationPayment?.baseFee ?? registration.fee ?? 0,
+                    gstAmount: registrationPayment?.gstAmount ?? registration.gstAmount ?? 0,
+                    totalAmount: registrationPayment?.totalAmount ?? registration.totalAmount ?? 0,
+                    paymentAmount: registrationPayment?.paymentAmount ?? 0,
+                    paymentStatus: registration.paymentStatus,
+                    payment: registrationPayment || ''
+                }
+                : null
         });
     } catch (error) {
         console.error(error);

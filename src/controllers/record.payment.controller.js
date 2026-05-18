@@ -142,6 +142,18 @@ const registerEemaFromBookingLog = async (bulkRefId, paymentLog) => {
     const bookingLog = await BookingLogs.findOne({ bulkRefId });
     if (!bookingLog?.eemareg || !shouldRegisterEemaFromLog(bookingLog.eemareg)) return;
 
+    let registration = await EmmaRegistration.findOne({ orderId: bulkRefId });
+    if (registration) {
+        const registrationPayment = await EmmaRegistrationPayment.findOne({
+            registrationId: registration._id,
+            orderId: registration.orderId
+        });
+
+        if (registration.paymentStatus === 'paid' || registrationPayment) {
+            return registration.orderId;
+        }
+    }
+
     const {
         registrationData,
         baseFee,
@@ -157,8 +169,6 @@ const registerEemaFromBookingLog = async (bulkRefId, paymentLog) => {
         razorpay_payment_id: paymentLog.razorpay_payment_id
     });
     if (existingPayment) return existingPayment.orderId;
-
-    let registration = await EmmaRegistration.findOne({ orderId: bulkRefId });
 
     if (!registration) {
         const validation = await validateRegistrationPayload({
@@ -202,7 +212,7 @@ const registerEemaFromBookingLog = async (bulkRefId, paymentLog) => {
     await addRegistrationCompany(registration);
 
     try {
-        await sendEmmaRegistrationSuccessMail(registration, payment);
+        sendEmmaRegistrationSuccessMail(registration, payment);
     } catch (mailError) {
         console.error('EEMA registration confirmation mail failed:', mailError);
     }

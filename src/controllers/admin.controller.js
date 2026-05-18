@@ -7,6 +7,7 @@ import { loginMail } from "../services/login.main.service.js";
 import Room from '../models/Room.model.js';
 import User from '../models/User.model.js';
 import PaymentRecords from '../models/Payment.model.js';
+import EmmaRegistrationPayment from '../models/EmmaRegistrationPayment.model.js';
 import Company from '../models/Company.model.js';
 import { createRemainingPaymentToken, sendMail, sendRemainingPaymentMail } from "../services/mailer.service.js";
 import xlsx from 'xlsx';
@@ -142,6 +143,31 @@ export const getDashboard = async (req, res) => {
         const companies = await getCompanies();
         const AllUsers = await getUsersInternal();
 
+        // emmaPaymentFeeMap[razorpay_payment_id] → registration fee (combined payments: same Razorpay tx)
+        // emmaOrderFeeMap[orderId] → registration fee (separate payments: different Razorpay tx)
+        const allRazorpayIds = payments.map(p => p.razorpay_payment_id).filter(Boolean);
+        const allEmmaOrderIds = payments.map(p => p.emmaOrderId).filter(Boolean);
+
+        const emmaPaymentFeeMap = {};   // keyed by razorpay_payment_id
+        const emmaOrderFeeMap = {};     // keyed by orderId
+
+        if (allRazorpayIds.length > 0 || allEmmaOrderIds.length > 0) {
+            const query = {};
+            if (allRazorpayIds.length > 0) query.razorpay_payment_id = { $in: allRazorpayIds };
+            if (allEmmaOrderIds.length > 0) query.orderId = { $in: allEmmaOrderIds };
+
+            const emmaPayments = await EmmaRegistrationPayment.find(
+                allRazorpayIds.length > 0 && allEmmaOrderIds.length > 0
+                    ? { $or: [{ razorpay_payment_id: { $in: allRazorpayIds } }, { orderId: { $in: allEmmaOrderIds } }] }
+                    : query
+            ).select('razorpay_payment_id orderId paymentAmount');
+
+            for (const ep of emmaPayments) {
+                emmaPaymentFeeMap[ep.razorpay_payment_id] = ep.paymentAmount || 0;
+                emmaOrderFeeMap[ep.orderId] = ep.paymentAmount || 0;
+            }
+        }
+
         const roomsData = rawrooms.filter(room => {
             if (room?.isDeactive == 'false' || room?.isDeactive == undefined) {
                 return room
@@ -156,7 +182,9 @@ export const getDashboard = async (req, res) => {
             );
 
             const totalPaidAmount = paymentsData.reduce((sum, payment) => {
-                return sum + (payment.paymentAmount || 0);
+                // only subtract registration fee if the same Razorpay payment was used for both
+                const registrationFee = emmaPaymentFeeMap[payment.razorpay_payment_id] || 0;
+                return sum + ((payment.paymentAmount || 0) - registrationFee);
             }, 0);
 
             return {
@@ -181,9 +209,7 @@ export const getDashboard = async (req, res) => {
         let UsersCount = 0;
         const rooms = roomsData.map(room => {
             const attendees = room.attendees.map(id =>
-                users.find(user =>
-                    String(id) === String(user._id)
-                )
+                users.find(user => String(id) === String(user._id))
             ).filter(Boolean);
 
             const uniqueCount = new Set(
@@ -192,20 +218,74 @@ export const getDashboard = async (req, res) => {
 
             UsersCount += uniqueCount;
 
+            const primaryAttendee = attendees.find(a => a.is_primary_user) || attendees[0] || null;
+            const lastPayment = room.payments[room.payments.length - 1] || null;
+
+            // combined payment → same razorpay_payment_id in both collections
+            // separate payment → different Razorpay tx, look up by emmaOrderId
+            const registrationAmount = lastPayment
+                ? (emmaPaymentFeeMap[lastPayment.razorpay_payment_id]
+                    ?? emmaOrderFeeMap[lastPayment.emmaOrderId]
+                    ?? 0)
+                : 0;
+
             return {
-                ...room,
-                attendees
+                _id: room._id,
+                bulkRefId: room.bulkRefId,
+                roomId: room.roomId,
+                roomType: room.roomType,
+                checkIn: room.checkIn,
+                checkOut: room.checkOut,
+                createdAt: room.createdAt,
+                voucherSend: room.voucherSend,
+                passcode: room.passcode ?? null,
+                hasEmmaRegistration: Boolean(room.payments.some(p => p.emmaOrderId)),
+                primaryAttendee: primaryAttendee ? {
+                    _id: primaryAttendee._id,
+                    firstName: primaryAttendee.firstName,
+                    lastName: primaryAttendee.lastName,
+                    email: primaryAttendee.email,
+                    phone: primaryAttendee.phone,
+                    gst: primaryAttendee.gst,
+                    company: primaryAttendee.company
+                        ? { _id: primaryAttendee.company._id, name: primaryAttendee.company.name, gst: primaryAttendee.company.gst }
+                        : null
+                } : null,
+                attendees: attendees.map(a => ({
+                    _id: a._id,
+                    firstName: a.firstName,
+                    lastName: a.lastName,
+                    email: a.email,
+                    phone: a.phone,
+                    gst: a.gst,
+                    isPrimary: a.is_primary_user,
+                    company: a.company
+                        ? { _id: a.company._id, name: a.company.name, gst: a.company.gst }
+                        : null
+                })),
+                payment: lastPayment ? {
+                    _id: lastPayment._id,
+                    razorpay_order_id: lastPayment.razorpay_order_id,
+                    razorpay_payment_id: lastPayment.razorpay_payment_id,
+                    razorpayAmount: lastPayment.paymentAmount,       // actual gross charged on Razorpay
+                    roomAmount: room.totalPaidAmount,                // room-only portion
+                    registrationAmount,                              // EEMA registration fee (combined or separate)
+                    isCombinedPayment: registrationAmount > 0 && Boolean(emmaPaymentFeeMap[lastPayment.razorpay_payment_id])
+                } : null
             };
         });
 
-        const totelAmount = rooms.reduce((sum, room) => {
-            return sum + (room?.totalPaidAmount || 0);
-        }, 0);
+        const totalAmount = rooms.reduce((sum, room) => sum + (room.payment?.roomAmount || 0), 0);
+        const totalRegistrationAmount = rooms.reduce((sum, room) => sum + (room.payment?.registrationAmount || 0), 0);
 
-        return sendSuccess(res, 'Dashbord fetch successful', {
-            rooms,
-            user_count: UsersCount,
-            totelAmount
+        return sendSuccess(res, 'Dashboard fetch successful', {
+            summary: {
+                totalRooms: rooms.length,
+                totalUsers: UsersCount,
+                totalAmount,
+                totalRegistrationAmount
+            },
+            rooms
         });
 
     } catch (error) {
@@ -258,7 +338,7 @@ const getTotalAmount = async () => {
 
 const getPaymentRecords = async () => {
     try {
-        const payments = await PaymentRecords.find().select('_id razorpay_payment_id razorpay_order_id paymentAmount');
+        const payments = await PaymentRecords.find().select('_id razorpay_payment_id razorpay_order_id paymentAmount emmaOrderId');
 
         return payments;
 

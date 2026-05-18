@@ -1,5 +1,6 @@
 import EmmaRegistration from '../models/EmmaRegistration.model.js';
 import EmmaRegistrationPayment from '../models/EmmaRegistrationPayment.model.js';
+import BookingLogs from '../models/Log.Booking.model.js';
 import Company from '../models/Company.model.js';
 import { sendEmmaRegistrationSuccessMail } from '../services/mailer.service.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
@@ -205,6 +206,60 @@ export const getEmmaRegistration = async (req, res) => {
   }
 };
 
+export const getRegistrationByOrderId = async (req, res) => {
+  try {
+    const orderId = req.query.orderId || req.params.orderId;
+
+    if (!orderId) {
+      return sendError(res, 'orderId is required', 400);
+    }
+
+    const registration = await EmmaRegistration.findOne({ orderId: String(orderId).trim() });
+
+    if (!registration) {
+      return sendError(res, 'Registration not found for this orderId', 404);
+    }
+
+    const bookingLog = await BookingLogs.findOne({ bulkRefId: orderId });
+
+    if (bookingLog && bookingLog.stage >= 5) {
+      return sendSuccess(res, 'Booking already completed for this orderId', {
+        bookingDone: true,
+        orderId,
+        registration: {
+          firstName: registration.firstName,
+          lastName: registration.lastName,
+          email: registration.email,
+          phone: registration.phone,
+          company: registration.company,
+          memberType: registration.memberType
+        }
+      });
+    }
+
+    return sendSuccess(res, 'Registration details fetched successfully', {
+      bookingDone: false,
+      orderId,
+      stage: bookingLog?.stage ?? null,
+      registration: {
+        firstName: registration.firstName,
+        lastName: registration.lastName,
+        email: registration.email,
+        phone: registration.phone,
+        company: registration.company,
+        gst: registration.gst,
+        memberType: registration.memberType,
+        fee: registration.fee,
+        gstAmount: registration.gstAmount,
+        totalAmount: registration.totalAmount
+      }
+    });
+
+  } catch (error) {
+    return sendError(res, error.message, 500);
+  }
+};
+
 export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
   try {
     const {
@@ -270,7 +325,7 @@ export const recordEmmaRegistrationPaymentSuccess = async (req, res) => {
     await addRegistrationCompany(registration);
 
     try {
-      await sendEmmaRegistrationSuccessMail(registration, payment);
+      sendEmmaRegistrationSuccessMail(registration, payment);
     } catch (mailError) {
       console.error('EEMA registration confirmation mail failed:', mailError);
     }

@@ -3,7 +3,7 @@ dotenv.config();
 
 import app from './app.js';
 import connectDB from './config/db.js';
-import { bookingReminderCron } from './cron/reminder.cron.js';
+import { bookingReminderCron, emmaRegistrationReminderCron } from './cron/reminder.cron.js';
 import { backfillRoomPaymentIds } from './scripts/backfill.room.payment.ids.js';
 
 
@@ -20,8 +20,12 @@ const startServer = async () => {
       console.error('Room paymentIds backfill failed:', error);
     }
 
-    if (process.env.ENABLE_CRON === 'true') {
-      bookingReminderCron();
+    // if (process.env.ENABLE_CRON === 'true') {
+    //   bookingReminderCron();
+    // }
+
+    if (process.env.ENABLE_EMMA_CRON === 'true') {
+      emmaRegistrationReminderCron();
     }
 
     app.listen(PORT, () => {
