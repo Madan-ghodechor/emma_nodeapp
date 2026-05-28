@@ -5,25 +5,63 @@ import adminAuth from "../../middlewares/v2/adminAuth.middleware.js";
 
 const router = express.Router();
 
+//=========================================================================================//
+//================================= Authentication Routes =================================//
+//=========================================================================================//
 
+//________ Authorization ________ //
+router.post(
+  "/login",
+  AdminValidator.validateAdminLogin,
+  admin.login
+);
+
+//________ Create new Authority ________ //
 router.post(
   "/create-admin",
   adminAuth,
   AdminValidator.validateCreateAdmin,
-  admin.createAdmin,
+  admin.createAdmin
 );
-router.post("/login", AdminValidator.validateAdminLogin, admin.login);
+
+//=========================================================================================//
+//=============================== End Authentication Routes ===============================//
+//=========================================================================================//
+
+
+
+
+
+//=========================================================================================//
+//====================================== Event Routes ======================================//
+//=========================================================================================//
+
+//________ Create New Event, Dynamic Voucher, site banner's etc data ________ //
 router.post(
   "/create-event",
   adminAuth,
   AdminValidator.validateCreateEvent,
-
-  admin.createEvent,
+  admin.createEvent
 );
-router.put("/update-event/:id", adminAuth,AdminValidator.validateUpdateEvent, admin.updateEvent);
-router.get("/events", adminAuth, admin.getEvents);
 
+//________ Update Existing Event  ________ //
+router.put(
+  "/update-event/:id",
+  adminAuth, 
+  AdminValidator.validateUpdateEvent,
+  admin.updateEvent
+);
+ 
+//________ Get All Event's List ________ //
+router.get(
+  "/events", 
+  adminAuth, 
+  admin.getEvents
+);
 
+//=========================================================================================//
+//=================================== End Event Routes ====================================//
+//=========================================================================================//
 
 
 export default router;
