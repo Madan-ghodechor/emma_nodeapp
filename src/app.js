@@ -17,11 +17,13 @@ import newAdminRoutes from './routes/v2/admin.routes.js';
 import emmaRegistrationRoutes from './routes/emma.registration.routes.js';
 import { generateVoucher } from './voucher/generateVoucher.js'
 import path from "path";
+import fileUpload from "express-fileupload";
 
 
 const app = express();
 
 app.use(express.json());
+app.use(fileUpload());
 app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
@@ -44,7 +46,7 @@ app.use('/api/record-payment', paymentRecord)
 app.use('/api/emma-registration', emmaRegistrationRoutes)
 
 app.use('/api/admin/', adminRoutes)
-app.use('/api/v1/admin/', newAdminRoutes)
+app.use('/api/v2/admin/', newAdminRoutes)
 
 app.post('/api/voucher', async (req, res) => {
   const buffer = await generateVoucher(req.body);
