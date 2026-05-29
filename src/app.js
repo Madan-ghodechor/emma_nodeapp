@@ -13,7 +13,8 @@ import amountverification from './routes/amount.verification.routes.js';
 import logBookingAttempt from './routes/log.booking.attempt.routes.js';
 import paymentRecord from './routes/payment.record.routes.js';
 import adminRoutes from './routes/admin.routes.js';
-import newAdminRoutes from './routes/v2/admin.routes.js';
+import newAdminRoutes from './routes/v2/admin/admin.routes.js';
+import newUserRoutes from "./routes/v2/user/user.routes.js";
 import emmaRegistrationRoutes from './routes/emma.registration.routes.js';
 import { generateVoucher } from './voucher/generateVoucher.js'
 import path from "path";
@@ -47,6 +48,7 @@ app.use('/api/emma-registration', emmaRegistrationRoutes)
 
 app.use('/api/admin/', adminRoutes)
 app.use('/api/v2/admin/', newAdminRoutes)
+app.use("/api/v2/user/", newUserRoutes);
 
 app.post('/api/voucher', async (req, res) => {
   const buffer = await generateVoucher(req.body);

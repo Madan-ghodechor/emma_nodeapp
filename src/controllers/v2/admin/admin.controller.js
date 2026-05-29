@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 import Admin from "../../../models/v2/admin/admin.model.js";
-import EventConfig from "../../../models/v2/admin/event.model.js";
+import new_EventConfig from "../../../models/v2/admin/event.model.js";
 import { sendSuccess, sendError } from "../../../utils/responseHandler.js";
 
 const uploadDir = path.join(process.cwd(), "src", "uploads", "events");
@@ -19,6 +19,12 @@ const toNum = (value) => {
   if (value === undefined || value === null || value === "") return null;
   const n = Number(value);
   return Number.isNaN(n) ? null : n;
+};
+
+const toDate = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
 };
 
 const saveFile = async (file, eventName) => {
@@ -138,9 +144,12 @@ class admin {
 
         headerBanner,
         voucherHeaderImage,
+        dateSelectionEnabled: toBool(body.dateSelectionEnabled),
+        eventStartDate: toDate(body.eventStartDate),
+        eventEndDate: toDate(body.eventEndDate),
       };
 
-      const createdEvent = await EventConfig.create(eventData);
+      const createdEvent = await new_EventConfig.create(eventData);
 
       return sendSuccess(res, "Event created successfully", createdEvent);
     } catch (error) {
@@ -154,7 +163,7 @@ class admin {
       const body = req.body || {};
       const files = req.files || {};
 
-      const existingEvent = await EventConfig.findById(id);
+      const existingEvent = await new_EventConfig.findById(id);
       if (!existingEvent) {
         return sendError(res, "Event not found", 404);
       }
@@ -267,13 +276,26 @@ class admin {
 
         headerBanner,
         voucherHeaderImage,
+        dateSelectionEnabled:
+          body.dateSelectionEnabled !== undefined
+            ? toBool(body.dateSelectionEnabled)
+            : existingEvent.dateSelectionEnabled,
+        eventStartDate:
+          body.eventStartDate !== undefined
+            ? toDate(body.eventStartDate)
+            : existingEvent.eventStartDate,
+        eventEndDate:
+          body.eventEndDate !== undefined
+            ? toDate(body.eventEndDate)
+            : existingEvent.eventEndDate,
       };
 
-      const updatedEvent = await EventConfig.findByIdAndUpdate(
+      const updatedEvent = await new_EventConfig.findByIdAndUpdate(
         id,
         updatedData,
         {
           new: true,
+          runValidators: true,
         },
       );
 
@@ -290,8 +312,8 @@ class admin {
       const skip = (page - 1) * limit;
 
       const [events, total] = await Promise.all([
-        EventConfig.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-        EventConfig.countDocuments(),
+        new_EventConfig.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+        new_EventConfig.countDocuments(),
       ]);
 
       return sendSuccess(res, "Events fetched successfully", {
@@ -361,7 +383,7 @@ export default admin;
 // import fs from "fs";
 
 // import Admin from "../../../models/v2/admin/admin.model.js";
-// import EventConfig from "../../../models/v2/admin/event.model.js";
+// import new_EventConfig from "../../../models/v2/admin/event.model.js";
 // import { sendSuccess, sendError } from "../../../utils/responseHandler.js";
 
 // const uploadDir = path.join(process.cwd(), "src", "uploads");
@@ -475,7 +497,7 @@ export default admin;
 //         voucherHeaderImage,
 //       };
 
-//       const createdEvent = await EventConfig.create(eventData);
+//       const createdEvent = await new_EventConfig.create(eventData);
 
 //       return sendSuccess(res, "Event created successfully", createdEvent);
 //     } catch (error) {
@@ -489,7 +511,7 @@ export default admin;
 //       const body = req.body || {};
 //       const files = req.files || {};
 
-//       const existingEvent = await EventConfig.findById(id);
+//       const existingEvent = await new_EventConfig.findById(id);
 //       if (!existingEvent) {
 //         return sendError(res, "Event not found", 404);
 //       }
@@ -601,7 +623,7 @@ export default admin;
 //         voucherHeaderImage,
 //       };
 
-//       const updatedEvent = await EventConfig.findByIdAndUpdate(
+//       const updatedEvent = await new_EventConfig.findByIdAndUpdate(
 //         id,
 //         updatedData,
 //         {

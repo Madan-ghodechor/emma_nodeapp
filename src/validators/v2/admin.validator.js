@@ -121,6 +121,7 @@ class AdminValidator {
         "singleSharingRoomEnabled",
         "doubleSharingRoomEnabled",
         "tripleSharingRoomEnabled",
+        "dateSelectionEnabled",
       ];
 
       for (const field of requiredBooleanFields) {
@@ -134,6 +135,19 @@ class AdminValidator {
 
         if (!isBooleanLike(body[field])) {
           return sendError(res, `${field} must be a boolean`, 400);
+        }
+      }
+
+      const requiredDateFields = ["eventStartDate", "eventEndDate"];
+
+      for (const field of requiredDateFields) {
+        if (isEmpty(body[field])) {
+          return sendError(res, `${field} is required`, 400);
+        }
+
+        const date = new Date(body[field]);
+        if (Number.isNaN(date.getTime())) {
+          return sendError(res, `${field} must be a valid date`, 400);
         }
       }
 

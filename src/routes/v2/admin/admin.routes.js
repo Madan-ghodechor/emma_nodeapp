@@ -1,7 +1,7 @@
 import express from 'express';
-import admin from '../../controllers/v2/admin/admin.controller.js';
-import AdminValidator from "../../validators/v2/admin.validator.js";
-import adminAuth from "../../middlewares/v2/adminAuth.middleware.js";
+import admin from '../../../controllers/v2/admin/admin.controller.js';
+import AdminValidator from "../../../validators/v2/admin.validator.js";
+import adminAuth from "../../../middlewares/v2/adminAuth.middleware.js";
 
 const router = express.Router();
 

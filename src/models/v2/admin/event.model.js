@@ -106,8 +106,24 @@ const eventSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    dateSelectionEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    eventStartDate: {
+      type: Date,
+      required: function () {
+        return this.dateSelectionEnabled;
+      },
+    },
+    eventEndDate: {
+      type: Date,
+      required: function () {
+        return this.dateSelectionEnabled;
+      },
+    },
   },
   { timestamps: true },
 );
 
-export default mongoose.model("EventConfig", eventSchema);
+export default mongoose.model("new_EventConfig", eventSchema);
