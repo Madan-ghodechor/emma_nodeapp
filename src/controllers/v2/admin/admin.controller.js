@@ -307,23 +307,10 @@ class admin {
 
   static async getEvents(req, res) {
     try {
-      const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-      const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
-      const skip = (page - 1) * limit;
-
-      const [events, total] = await Promise.all([
-        new_EventConfig.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-        new_EventConfig.countDocuments(),
-      ]);
+      const events = await new_EventConfig.find().sort({ createdAt: -1 });
 
       return sendSuccess(res, "Events fetched successfully", {
         events,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
       });
     } catch (error) {
       return sendError(res, error.message, 500);

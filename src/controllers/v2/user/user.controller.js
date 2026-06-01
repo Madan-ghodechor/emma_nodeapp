@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import new_EventConfig from "../../../models/v2/admin/event.model.js";
+import UserLogs from "../../../models/v2/user/logs.model.js";
 import { sendSuccess, sendError } from "../../../utils/responseHandler.js";
 
 class userController {
@@ -22,6 +23,52 @@ class userController {
       }
 
       return sendSuccess(res, "Event fetched successfully", event);
+    } catch (error) {
+      return sendError(res, error.message, 500);
+    }
+  }
+
+  static async logs(req, res) {
+    try {
+      const body = req.body || {};
+      const { email, sessionId } = body;
+
+      if (!email || !sessionId) {
+        return sendError(res, "email and sessionId are required", 400);
+      }
+
+      const normalizedEmail = String(email).toLowerCase().trim();
+      const normalizedSessionId = String(sessionId).trim();
+      const newLog = {
+        ...body,
+        email: normalizedEmail,
+        sessionId: normalizedSessionId,
+      };
+
+      let doc = await UserLogs.findOne({ email: normalizedEmail });
+
+      if (!doc) {
+        doc = await UserLogs.create({
+          email: normalizedEmail,
+          logs: [newLog],
+        });
+
+        return sendSuccess(res, "Log created successfully", doc, 201);
+      }
+
+      const logIndex = doc.logs.findIndex(
+        (log) => String(log.sessionId).trim() === normalizedSessionId,
+      );
+
+      if (logIndex >= 0) {
+        doc.logs[logIndex].set(newLog);
+      } else {
+        doc.logs.push(newLog);
+      }
+
+      await doc.save();
+
+      return sendSuccess(res, "Log saved successfully", doc);
     } catch (error) {
       return sendError(res, error.message, 500);
     }
