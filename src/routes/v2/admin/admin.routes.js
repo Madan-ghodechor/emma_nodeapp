@@ -40,16 +40,16 @@ router.post(
 router.post(
   "/create-event",
   adminAuth,
-  AdminValidator.validateCreateEvent,
-  admin.createEvent
+  AdminValidator.validateCreateAndUpdateEvent,
+  admin.createEvent,
 );
 
 //________ Update Existing Event  ________ //
 router.put(
   "/update-event/:id",
-  adminAuth, 
-  AdminValidator.validateUpdateEvent,
-  admin.updateEvent
+  adminAuth,
+  AdminValidator.validateCreateAndUpdateEvent,
+  admin.updateEvent,
 );
  
 //________ Get All Event's List ________ //
