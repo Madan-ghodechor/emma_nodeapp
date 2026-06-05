@@ -67,10 +67,24 @@ class AdminValidator {
     return next();
   }
 
-  static validateCreateEvent(req, res, next) {
+  static validateCreateAndUpdateEvent(req, res, next) {
     try {
       const body = req.body || {};
       const files = req.files || {};
+      const { id } = req.params || {};
+      // console.log(id);
+
+       
+      if (id != undefined) {
+
+
+
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+              return sendError(res, "Invalid event id", 400);
+            }
+        
+      }
+      
 
       const isEmpty = (value) =>
         value === undefined || value === null || String(value).trim() === "";
@@ -138,27 +152,66 @@ class AdminValidator {
         }
       }
 
-      const requiredDateFields = ["eventStartDate", "eventEndDate"];
+      const dateSelectionEnabled =
+        body.dateSelectionEnabled === true ||
+        body.dateSelectionEnabled === "true" ||
+        body.dateSelectionEnabled === 1 ||
+        body.dateSelectionEnabled === "1";
 
-      for (const field of requiredDateFields) {
-        if (isEmpty(body[field])) {
-          return sendError(res, `${field} is required`, 400);
+
+      
+
+
+      const requiredDateFields = [];
+
+      if (dateSelectionEnabled) {
+
+        requiredDateFields.push("eventStartDate", "eventEndDate");
+        
+      }
+        for (const field of requiredDateFields) {
+          if (isEmpty(body[field])) {
+            return sendError(res, `${field} is required`, 400);
+          }
+
+          const date = new Date(body[field]);
+          if (Number.isNaN(date.getTime())) {
+            return sendError(res, `${field} must be a valid date`, 400);
+          }
         }
 
-        const date = new Date(body[field]);
-        if (Number.isNaN(date.getTime())) {
-          return sendError(res, `${field} must be a valid date`, 400);
-        }
+      const toBoolean = (value) =>
+        value === true || value === "true" || value === 1 || value === "1";
+
+      const guestsRegistrationEnabled = toBoolean(
+        body.guestsRegistrationEnabled,
+      );
+      const roomPricingExcludingGst = toBoolean(body.roomPricingExcludingGst);
+      const singleSharingRoomEnabled = toBoolean(body.singleSharingRoomEnabled);
+      const doubleSharingRoomEnabled = toBoolean(body.doubleSharingRoomEnabled);
+      const tripleSharingRoomEnabled = toBoolean(body.tripleSharingRoomEnabled);
+
+      const requiredNumberFields = [];
+
+      if (guestsRegistrationEnabled) {
+        requiredNumberFields.push("memberPrice", "nonMemberPrice");
       }
 
-      const requiredNumberFields = [
-        "memberPrice",
-        "nonMemberPrice",
-        "gstPercentage",
-        "singleSharingPrice",
-        "doubleSharingPrice",
-        "tripleSharingPrice",
-      ];
+      if (roomPricingExcludingGst) {
+        requiredNumberFields.push("gstPercentage");
+      }
+
+      if (singleSharingRoomEnabled) {
+        requiredNumberFields.push("singleSharingPrice");
+      }
+
+      if (doubleSharingRoomEnabled) {
+        requiredNumberFields.push("doubleSharingPrice");
+      }
+
+      if (tripleSharingRoomEnabled) {
+        requiredNumberFields.push("tripleSharingPrice");
+      }
 
       for (const field of requiredNumberFields) {
         if (
@@ -190,13 +243,15 @@ class AdminValidator {
         return sendError(res, "cotravSupportContact is invalid", 400);
       }
 
-      if (!files.headerBanner) {
-        return sendError(res, "headerBanner is required", 400);
-      }
+      if (id == undefined) {
 
-      if (!files.voucherHeaderImage) {
-        return sendError(res, "voucherHeaderImage is required", 400);
-      }
+         if (!files.headerBanner) {
+           return sendError(res, "headerBanner is required", 400);
+         }
+
+         if (!files.voucherHeaderImage) {
+           return sendError(res, "voucherHeaderImage is required", 400);
+         }
 
       const allowedMimeTypes = [
         "image/jpeg",
@@ -223,13 +278,22 @@ class AdminValidator {
         );
       }
 
-      if (files.headerBanner.size > maxSizeInBytes) {
-        return sendError(res, "headerBanner must be less than 5 MB", 400);
+         if (files.headerBanner.size > maxSizeInBytes) {
+           return sendError(res, "headerBanner must be less than 5 MB", 400);
+         }
+
+         if (files.voucherHeaderImage.size > maxSizeInBytes) {
+           return sendError(
+             res,
+             "voucherHeaderImage must be less than 5 MB",
+             400,
+           );
+         }
+        
+
       }
 
-      if (files.voucherHeaderImage.size > maxSizeInBytes) {
-        return sendError(res, "voucherHeaderImage must be less than 5 MB", 400);
-      }
+     
 
       return next();
     } catch (error) {
@@ -237,19 +301,7 @@ class AdminValidator {
     }
   }
 
-  static validateUpdateEvent(req, res, next) {
-    const { id } = req.params || {};
 
-    if (!id) {
-      return sendError(res, "Event id is required", 400);
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return sendError(res, "Invalid event id", 400);
-    }
-
-    return next();
-  }
 }
 
 export default AdminValidator;
