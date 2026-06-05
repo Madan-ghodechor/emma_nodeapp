@@ -20,7 +20,7 @@ export const getRegistrationPayload = (body = {}) => {
     lastName,
     email,
     phone,
-    company,
+    organisation,
     gst,
     fee,
     gstAmount,
@@ -33,7 +33,7 @@ export const getRegistrationPayload = (body = {}) => {
     lastName,
     email,
     phone,
-    company,
+    organisation,
     gst,
     fee,
     gstAmount,
@@ -47,11 +47,11 @@ export const validateRegistrationPayload = async (payload) => {
     lastName,
     email,
     phone,
-    company,
+    organisation,
     fee
   } = payload;
 
-  if (!firstName || !lastName || !email || !phone || !company || !fee) {
+  if (!firstName || !lastName || !email || !phone || !organisation || !fee) {
     return {
       valid: false,
       statusCode: 400,

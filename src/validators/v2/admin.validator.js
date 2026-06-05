@@ -203,13 +203,14 @@ class AdminValidator {
         "image/png",
         "image/jpg",
         "image/webp",
+        "image/svg+xml",
       ];
       const maxSizeInBytes = 5 * 1024 * 1024;
 
       if (!allowedMimeTypes.includes(files.headerBanner.mimetype)) {
         return sendError(
           res,
-          "headerBanner must be a jpg, jpeg, png, or webp image",
+          "headerBanner must be a jpg, jpeg, png, webp, or svg image",
           400,
         );
       }
@@ -217,7 +218,7 @@ class AdminValidator {
       if (!allowedMimeTypes.includes(files.voucherHeaderImage.mimetype)) {
         return sendError(
           res,
-          "voucherHeaderImage must be a jpg, jpeg, png, or webp image",
+          "voucherHeaderImage must be a jpg, jpeg, png, webp, or svg image",
           400,
         );
       }
